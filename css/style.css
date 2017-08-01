@@ -38,13 +38,14 @@ p{font-family:verdana; font-size:12px; margin:2px;}
 #menu ul li{
     float:left;
 	font-size: 14px;
+	width:180px;
 }
 #menu ul li a{
     display:block;
     text-decoration:none;
     padding:4px 5px;
     background-color:#505050;
-    width:110px;
+    width:180px;
     text-align:center;
 }
 #menu ul li a span{

@@ -1,7 +1,7 @@
 /************************************************
  * D3 sync tree render function
  ************************************************/
-var treeData = [
+var nameTreeData = [
   {
     "components": [],
     "parent": "null",
@@ -20,32 +20,32 @@ var height_total = 600;
 //document.body.clientHeight - document.getElementById("connect-section").offsetHeight- document.getElementById("option-section").offsetHeight;
 
 var margin = {top: 20, right: 120, bottom: 20, left: 120},
-  width = width_total - margin.right - margin.left,
-  height = height_total - margin.top - margin.bottom;
+    width = width_total - margin.right - margin.left,
+    height = height_total - margin.top - margin.bottom;
 
 var i = 0,
-  duration = 750,
-  root;
+    duration = 750,
+    nameRoot;
 
-var tree = d3.layout.tree()
-  .size([height, width]);
+var tree = d3.layout.tree().size([height, width]);
 var multiParents = [];
 
 var diagonal = d3.svg.diagonal()
   .projection(function(d) { return [d.y, d.x]; });
 
-var svg = d3.select("#tree").append("svg")
+var svg = d3.select("#view-container").append("svg")
+  .attr("id", "nameTree")
   .attr("viewbox", "0, 0, " + width_total + ", " + height_total)
   .attr("width", width + margin.right + margin.left)
   .attr("height", height + margin.top + margin.bottom)
   .append("g")
   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-root = treeData[0];
+nameRoot = nameTreeData[0];
 // root.x0 = height / 2;
 // root.y0 = 0;
 
-update(root);
+update(nameRoot);
 
 d3.select(self.frameElement).style("height", "500px");
 
@@ -53,7 +53,7 @@ function update(source) {
   // Summary about how this D3 .update(), .enter(), .exit(), .transition() abstraction works
 
   // Compute the new tree layout.
-  var nodes = tree.nodes(root).reverse(),
+  var nodes = tree.nodes(nameRoot).reverse(),
       links = tree.links(nodes);
 
   // Normalize for fixed-depth.
@@ -243,10 +243,10 @@ function removeFromTree(data) {
   var dataName = data.getName();
   var nameSize = dataName.size();
 
-  var treeNode = root;
+  var treeNode = nameRoot;
   var idx = 0;
   
-  var matchStack = [root];
+  var matchStack = [nameRoot];
 
   while (idx < nameSize && treeNode["children"].length > 0) {
     childMatch = false;
@@ -321,8 +321,8 @@ function removeFromTree(data) {
           }
         }
       }
-    } else if (tempNode["children"].length == 1 && tempNode["children"][0]["is_content"] !== true && tempNode != root) {
-      // merge if needed (except root)
+    } else if (tempNode["children"].length == 1 && tempNode["children"][0]["is_content"] !== true && tempNode != nameRoot) {
+      // merge if needed (except nameRoot)
       var childNode = tempNode["children"][0];
       tempNode["components"].push.apply(tempNode["components"], childNode["components"]);
       tempNode["children"] = childNode["children"];
@@ -332,11 +332,11 @@ function removeFromTree(data) {
     }
   }
 
-  update(root);
+  update(nameRoot);
   return 0;
 }
 
-function insertToTree(data, ignoreMaxBranchingDepth) {
+function insertToTree(root, data, ignoreMaxBranchingDepth) {
   var dataName = data.getName();
   var nameSize = dataName.size();
 

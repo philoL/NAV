@@ -9,7 +9,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>NDN Namespace Tree Visualizer</title>
+  <title>NDN Application Visualizer</title>
 
   <link rel="stylesheet" href="css/tree.css" />
   <link rel="stylesheet" href="css/multiColumnTemplate.css" type="text/css">
@@ -40,22 +40,35 @@
 
     var paused = false;
     var pauseQueuedInterests = [];
+
+    // main structures for name, trust and access control
+    var nameTreeData   = [
+      {
+        "components": [],
+        "parent": "null",
+        "children": []
+      }
+    ];
+
   </script>
 </head>
 
 <body style="margin: 0 auto; max-width: 850px;">
   <!-- HEADER & MENU -->
   <div id="header">
-    <h1>/home</h1>
+    <h1>NDN Application Visualizer</h1>
   </div>
   
   <div id="menu">
     <ul>
       <li>
-			  <a href=""><span class="title" style="font-family:verdana">ABOUT</span></a>
+			  <a> <span class="title" style="font-family:verdana" onclick="showNameTree()" >NAME TREE</span> </a>
         </li>
 		  <li>
-			  <a href=""><span class="title" style="font-family:verdana">CONTACT</span></a>
+			  <a> <span class="title" style="font-family:verdana" onclick="showTrustView()">TRUST</span> </a>
+      </li>
+      <li>
+        <a> <span class="title" style="font-family:verdana" onclick="showAccessControlView()">ACCESS CONTROL</span> </a>
       </li>
 	  </ul>
   </div>
@@ -118,8 +131,8 @@
   </div>
   
   <!-- TREE -->
-  <div id="tree-container" style="clear:both;">
-    <div id="tree"></div>
+  <div id="view-container" style="clear:both;">
+    <!-- <div id="view"></div> -->
   </div>
  
   <!-- BOTTOM -->
@@ -129,11 +142,14 @@
   <div id="bottom-left"></div>
   <div id="bottom-right"></div>
   <div id="bottom">
-    <h1>&copy;2017 - NAME DATA NETWORKING NAMESPACE TREE</h1>
+    <h1>&copy;2017 - NAME DATA NETWORKING APPLICATION VISUALIZER</h1>
   </div>
 
-  <script type="text/javascript" src="js/tree.js"></script>
-  <script type="text/javascript" src="js/name-consumer.js"></script>
+  <script type="text/javascript" src="js/consumer.js"></script>
+  <script type="text/javascript" src="js/controler.js"></script>
+  <script type="text/javascript" src="js/nameTree.js"></script>
+  <script type="text/javascript" src="js/trust.js"></script>
+  <script type="text/javascript" src="js/accessControl.js"></script>
 
 </body>
 </html>

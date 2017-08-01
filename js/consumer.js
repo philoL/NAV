@@ -167,7 +167,7 @@ function buildDummyTree() {
     var data = new Data(dataName);
     if (!paused) {    
       console.log("Dummy: adding data name " + dataName.toUri());
-      insertToTree(data);
+      insertToTree(nameRoot, data);
       setTimeout(function () {
         console.log("Dummy: removing data name " + dataName.toUri());
         removeFromTree(data);
@@ -364,17 +364,17 @@ function onTimeout(interest) {
 function sausageUnitTest() {
   // Sausage test
   var data1 = new Data(new Name("/b/c"));
-  insertToTree(data1);
+  insertToTree(nameRoot, data1);
   var data2 = new Data(new Name("/c/b/b"));
-  insertToTree(data2);
+  insertToTree(nameRoot, data2);
   var data3 = new Data(new Name("/c/b/d"));
-  insertToTree(data3);
+  insertToTree(nameRoot, data3);
   
-  var couplingParent1 = tree.nodes(root).filter(function(d) {
+  var couplingParent1 = tree.nodes(nameRoot).filter(function(d) {
     return d['name'] === '/';
   })[0];
 
-  var couplingChild1 = tree.nodes(root).filter(function(d) {
+  var couplingChild1 = tree.nodes(nameRoot).filter(function(d) {
     return d['name'] === 'd';
   })[0];
 
@@ -384,7 +384,7 @@ function sausageUnitTest() {
   }];
 
   var data2 = new Data(new Name("/c/b/e"));
-  insertToTree(data2);
+  insertToTree(nameRoot, data2);
 
   // Existing branch end test
   // var data1 = new Data(new Name("/a/b/a"));
