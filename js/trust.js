@@ -11,7 +11,8 @@ var trustModelData = [
 
 var trustRelationshipData = [
   {
-    "name": "null",
+    "name": "",
+    "ndnName": "/",
     "parent": "null",
     "children": []
   }
@@ -216,27 +217,64 @@ function constructTrustModelTree(data) {
   var contentObj = JSON.parse(data.getContentAsBuffer().toString());
 
   trustModelData = contentObj;
+}
 
-  // var trustModelObj = [
-  //   {
-  //   "name" : "OpenmHealth",
-  //   "ndnName" : "/org/OpenmHealth",
-  //   "children": [
-  //     {"name" : "User",
-  //     "ndnName" : "/org/openmhealth/<user-id>",
-  //     "children": [
-  //       {"name" : "Device",
-  //       "ndnName" : "/org/openmhealth/<user-id>/<device-id>",
-  //       "children": [
-  //         {"name" : "Application",
-  //         "ndnName" : "/org/openmhealth/<user-id>/<device-id>/<app-id>",
-  //         "children": [
-  //           {"name" : "Data",
-  //           "ndnName" : "/org/openmhealth/<user-id>/<device-id>/<app-id>/Data",
-  //           "children": []}
-  //         ]}
-  //       ]}
-  //     ]}
-  //   ]}
-  // ]
+function insertToTrustRelationshipTree(root, data) {
+
+  var cNodeNameString = data.getName().toUri();
+  var pNodeNameString = data.getSignature().getKeyLocator().getKeyName().toUri()
+  var pNode = findNodeInTree(root, pNodeNameString);
+  
+  if (pNode.ndnName == "/") {
+    //if the parent node is the root, there is not parent name found, add a new branch
+    var newNode = {
+      "name" : "",
+      "ndnName" : pNodeNameString,
+      "children" : [
+        {
+          "name" : "",
+          "ndnName" : cNodeNameString,
+          "children" : []
+        }
+      ]
+    }
+
+    pNode.children.append(newNode);
+
+  } else {
+    //the parent node exists in the tree
+    doesChildExist = false;
+    for (var child in pNode.children){
+      if (child.ndnName == cNodeNameString) {
+        doesChildExist = true;
+        break;
+      }
+    }
+    if (!doesChildExist) {
+      //add a new child
+      var newNode = {
+        "name" : "",
+        "ndnName" : cNodeNameString,
+        "children" : []
+      }
+
+      pNode.children.append(newNode);
+    }
+  }
+}
+
+//find the parent node in the tree with the dataNameString
+function findNodeInTree(root, dataNameString) {
+
+  curNode = root;
+
+  while (curNode.children.length > 0) {
+    for (var child in curNode.children) {
+        if (child.ndnName == dataNameString) {
+          return child.parent;
+        } else {
+          return findNodeInTree(child, dataNameString);
+        }
+    }
+  }
 }

@@ -216,7 +216,7 @@ function onData(interest, data) {
   
   // we block multiple data with the same name from being displayed in the tree here
   if (receivedContent[dataName.toUri()] === undefined) {
-    var addedContentNode = insertToTree(data);
+    var addedContentNode = insertToTree(nameRoot, data);
     receivedContent[dataName.toUri()] = addedContentNode;
     // special hack for cert data so that we can later match without versioning
     // TODO: this hack means we don't support multiple versions of cert well...

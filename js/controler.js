@@ -5,6 +5,34 @@ initial();
 
 function initial(){
   createNameTreeSvg();
+
+
+   var trustModelObj = [
+    {
+    "name" : "OpenmHealth",
+    "ndnName" : "/org/OpenmHealth",
+    "children": [
+      {"name" : "User",
+      "ndnName" : "/org/openmhealth/<user-id>",
+      "children": [
+        {"name" : "Device",
+        "ndnName" : "/org/openmhealth/<user-id>/<device-id>",
+        "children": [
+          {"name" : "Application",
+          "ndnName" : "/org/openmhealth/<user-id>/<device-id>/<app-id>",
+          "children": [
+            {"name" : "Data",
+            "ndnName" : "/org/openmhealth/<user-id>/<device-id>/<app-id>/Data",
+            "children": []}
+          ]}
+        ]}
+      ]}
+    ]}
+  ]
+
+  var dataTM = new Data(new Name("/org/openmhealth/TrustModel"));
+  dataTM.setContent(JSON.stringify(trustModelObj));
+  constructTrustModelTree(dataTM);
 }
 
 
