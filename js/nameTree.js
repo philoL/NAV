@@ -16,7 +16,7 @@ var dataNodeColor = "#AAAAAA";
 
 // ************** Generate the tree diagram  *****************
 var width_total = 4000;
-var height_total = 600;
+var height_total = 654;
 //document.body.clientHeight - document.getElementById("connect-section").offsetHeight- document.getElementById("option-section").offsetHeight;
 
 var margin = {top: 20, right: 120, bottom: 20, left: 120},
@@ -32,24 +32,30 @@ var multiParents = [];
 
 var diagonal = d3.svg.diagonal()
   .projection(function(d) { return [d.y, d.x]; });
+ 
+var svgNameTree;
 
-var svg = d3.select("#view-container").append("svg")
-  .attr("id", "nameTree")
-  .attr("viewbox", "0, 0, " + width_total + ", " + height_total)
-  .attr("width", width + margin.right + margin.left)
-  .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+function createNameTreeSvg() {
+  svgNameTree = d3.select("#view-container").append("svg")
+    .attr("id", "nameTree")
+    .attr("viewbox", "0, 0, " + width_total + ", " + height_total)
+    .attr("width", width + margin.right + margin.left)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-nameRoot = nameTreeData[0];
-// root.x0 = height / 2;
-// root.y0 = 0;
+  d3.select("svg#nameTree").append("text")
+    .attr("x", 10)
+    .attr("y", 20)
+    .text("Name Tree");
 
-update(nameRoot);
+  d3.select(self.frameElement).style("height", "500px");
 
-d3.select(self.frameElement).style("height", "500px");
+  nameRoot = nameTreeData[0];
+  updateNameTree(nameRoot);
+}
 
-function update(source) {
+function updateNameTree(source) {
   // Summary about how this D3 .update(), .enter(), .exit(), .transition() abstraction works
 
   // Compute the new tree layout.
@@ -60,7 +66,7 @@ function update(source) {
   nodes.forEach(function(d) { d.y = d.depth * 120; });
 
   // Update the nodes
-  var node = svg.selectAll("g.node")
+  var node = svgNameTree.selectAll("g.node")
     .data(nodes, function(d) { return d.id || (d.id = ++i); });
 
   // Enter any new nodes at the parent's previous position.
@@ -128,7 +134,7 @@ function update(source) {
     .style("fill-opacity", 1e-6);
 
   // Update the links
-  var link = svg.selectAll("path.link")
+  var link = svgNameTree.selectAll("path.link")
     .data(links, function(d) { return d.target.id; });
 
   // Enter any new links at the parent's previous position.
@@ -161,13 +167,13 @@ function update(source) {
   
   // for trust relationship links
   if (showTrustRelationship) {
-    var multiLinks = svg.selectAll("g.additionalParentLink")
+    var multiLinks = svgNameTree.selectAll("g.additionalParentLink")
       .data(multiParents, function(d) {
         return d.child.id; 
       });
     
     // remove the old links to refresh
-    svg.selectAll('path.additionalParentLink').remove();
+    svgNameTree.selectAll('path.additionalParentLink').remove();
     multiLinks.enter().insert("path", "g")
       .attr("class", "additionalParentLink")
       .attr("d", function(d) {
@@ -186,7 +192,7 @@ function update(source) {
         });
       });
   } else {
-    svg.selectAll('path.additionalParentLink').remove();
+    svgNameTree.selectAll('path.additionalParentLink').remove();
   }
 }
 
@@ -224,7 +230,7 @@ function click(d) {
     d.children = d._children;
     d._children = null;
   }
-  update(d);
+  updateNameTree(d);
 }
 
 function doubleClick(d) {
@@ -347,6 +353,7 @@ function insertToTree(root, data, ignoreMaxBranchingDepth) {
     treeNode["children"] = [];
   }
 
+  // update names
   while (idx < nameSize && treeNode["children"].length > 0) {
     childMatch = false;
     for (var child in treeNode["children"]) {
@@ -438,7 +445,7 @@ function insertToTree(root, data, ignoreMaxBranchingDepth) {
   try {
     content = data.getContent().buf().toString('binary');
   } catch (e) {
-    content = "NULL";
+    content = "[DATA]";
   }
 
   var contentNode = {
@@ -449,7 +456,7 @@ function insertToTree(root, data, ignoreMaxBranchingDepth) {
   // append to last treeNode
   treeNode["children"].push(contentNode);
 
-  update(root);
+  updateNameTree(root);
   return contentNode;
 }
 

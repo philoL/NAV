@@ -363,28 +363,55 @@ function onTimeout(interest) {
 
 function sausageUnitTest() {
   // Sausage test
-  var data1 = new Data(new Name("/b/c"));
+  var data1 = new Data(new Name("/org/openmhealth"));
   insertToTree(nameRoot, data1);
   var data2 = new Data(new Name("/c/b/b"));
   insertToTree(nameRoot, data2);
   var data3 = new Data(new Name("/c/b/d"));
   insertToTree(nameRoot, data3);
   
-  var couplingParent1 = tree.nodes(nameRoot).filter(function(d) {
-    return d['name'] === '/';
-  })[0];
+  // var couplingParent1 = tree.nodes(nameRoot).filter(function(d) {
+  //   return d['name'] === '/';
+  // })[0];
 
-  var couplingChild1 = tree.nodes(nameRoot).filter(function(d) {
-    return d['name'] === 'd';
-  })[0];
+  // var couplingChild1 = tree.nodes(nameRoot).filter(function(d) {
+  //   return d['name'] === 'd';
+  // })[0];
 
-  multiParents = [{
-    parent: couplingParent1,
-    child: couplingChild1
-  }];
+  // multiParents = [{
+  //   parent: couplingParent1,
+  //   child: couplingChild1
+  // }];
 
   var data2 = new Data(new Name("/c/b/e"));
   insertToTree(nameRoot, data2);
+
+  var trustModelObj = [
+    {
+    "name" : "OpenmHealth",
+    "ndnName" : "/org/OpenmHealth",
+    "children": [
+      {"name" : "User",
+      "ndnName" : "/org/openmhealth/<user-id>",
+      "children": [
+        {"name" : "Device",
+        "ndnName" : "/org/openmhealth/<user-id>/<device-id>",
+        "children": [
+          {"name" : "Application",
+          "ndnName" : "/org/openmhealth/<user-id>/<device-id>/<app-id>",
+          "children": [
+            {"name" : "Data",
+            "ndnName" : "/org/openmhealth/<user-id>/<device-id>/<app-id>/Data",
+            "children": []}
+          ]}
+        ]}
+      ]}
+    ]}
+  ]
+
+  var dataTM = new Data(new Name("/org/openmhealth/TrustModel"));
+  dataTM.setContent(JSON.stringify(trustModelObj));
+  constructTrustModelTree(dataTM);
 
   // Existing branch end test
   // var data1 = new Data(new Name("/a/b/a"));
