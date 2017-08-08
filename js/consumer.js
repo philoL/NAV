@@ -223,51 +223,55 @@ function onData(interest, data) {
     if (dataName.size() > 1 && dataName.get(-2).toEscapedString() === "ID-CERT") {
       receivedContent[dataName.getPrefix(-1).toUri()] = addedContentNode;
     }
-    try {
-      // no matter if showTrustRelationship is toggled, we leave a trace for trust relationship links 
-      var signature = data.getSignature();
-      if (signature !== null && signature !== undefined) {
-        if (KeyLocator.canGetFromSignature(signature)) {
-          var signerName = signature.getKeyLocator().getKeyName();
-          var signerNameUri = signerName.toUri();
-          // we don't deal with self-signed for now
-          if (signerNameUri !== dataName.getPrefix(-1).toUri()) {
-            if (receivedContent[signerNameUri] === undefined) {
-              // we don't have the cert yet, we leave a placeholder
-              if (signerNameUri in pendingTrustLinks) {
-                pendingTrustLinks[signerNameUri].push(addedContentNode);
-              } else {
-                pendingTrustLinks[signerNameUri] = [addedContentNode];
-              }
-              // var dummySignerData = new Data(signerName);
-              // signerContentNode = insertToTree(dummySignerData);
-              // receivedContent[signerNameUri] = signerContentNode;
-            } else {
-              // we already have the cert (TODO: which we shouldn't because of cert versioning), push the links
-              // TODO: this means for certs already fetched, we won't establish trust relationship correctly (unless with hack above)
-              var signerContentNode = receivedContent[signerNameUri];
-              multiParents.push({parent: signerContentNode, child: addedContentNode});
-              console.log("** append signing relationship: " + signerNameUri + " --> " + dataName.toUri() + "**");
-            }
-          } else {
-            console.log("** self-signed: " + dataName.toUri());
-          }
-        }
-      }
-    } catch (e) {
-      console.log(e);
-    }
 
-    // if the new data we just inserted have a trace in the expected signers
-    // (we don't have the veresion number after ID-CERT)
-    var dataNameUriWithoutLastUri = dataName.getPrefix(-1).toUri();
-    if (dataNameUriWithoutLastUri in pendingTrustLinks) {
-      for (var idx in pendingTrustLinks[dataNameUriWithoutLastUri]) {
-        multiParents.push({parent: addedContentNode, child: pendingTrustLinks[dataNameUriWithoutLastUri][idx]});
-        console.log("** supplement signing relationship: " + dataNameUriWithoutLastUri + " --> <stored data> **");
-      }
-      delete pendingTrustLinks[dataNameUriWithoutLastUri];
-    }
+    //insert to trust tree
+    insertToTrustRelationshipTree(trustRelationshipRoot, data);
+
+    // try {
+    //   // no matter if showTrustRelationship is toggled, we leave a trace for trust relationship links 
+    //   var signature = data.getSignature();
+    //   if (signature !== null && signature !== undefined) {
+    //     if (KeyLocator.canGetFromSignature(signature)) {
+    //       var signerName = signature.getKeyLocator().getKeyName();
+    //       var signerNameUri = signerName.toUri();
+    //       // we don't deal with self-signed for now
+    //       if (signerNameUri !== dataName.getPrefix(-1).toUri()) {
+    //         if (receivedContent[signerNameUri] === undefined) {
+    //           // we don't have the cert yet, we leave a placeholder
+    //           if (signerNameUri in pendingTrustLinks) {
+    //             pendingTrustLinks[signerNameUri].push(addedContentNode);
+    //           } else {
+    //             pendingTrustLinks[signerNameUri] = [addedContentNode];
+    //           }
+    //           // var dummySignerData = new Data(signerName);
+    //           // signerContentNode = insertToTree(dummySignerData);
+    //           // receivedContent[signerNameUri] = signerContentNode;
+    //         } else {
+    //           // we already have the cert (TODO: which we shouldn't because of cert versioning), push the links
+    //           // TODO: this means for certs already fetched, we won't establish trust relationship correctly (unless with hack above)
+    //           var signerContentNode = receivedContent[signerNameUri];
+    //           multiParents.push({parent: signerContentNode, child: addedContentNode});
+    //           console.log("** append signing relationship: " + signerNameUri + " --> " + dataName.toUri() + "**");
+    //         }
+    //       } else {
+    //         console.log("** self-signed: " + dataName.toUri());
+    //       }
+    //     }
+    //   }
+    // } catch (e) {
+    //   console.log(e);
+    // }
+
+    // // if the new data we just inserted have a trace in the expected signers
+    // // (we don't have the veresion number after ID-CERT)
+    // var dataNameUriWithoutLastUri = dataName.getPrefix(-1).toUri();
+    // if (dataNameUriWithoutLastUri in pendingTrustLinks) {
+    //   for (var idx in pendingTrustLinks[dataNameUriWithoutLastUri]) {
+    //     multiParents.push({parent: addedContentNode, child: pendingTrustLinks[dataNameUriWithoutLastUri][idx]});
+    //     console.log("** supplement signing relationship: " + dataNameUriWithoutLastUri + " --> <stored data> **");
+    //   }
+    //   delete pendingTrustLinks[dataNameUriWithoutLastUri];
+    // }
   }
   
   if (removeStaleFlag === true) {

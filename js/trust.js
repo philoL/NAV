@@ -119,14 +119,20 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
     });
   
   // append name text on top of the nodes
-  var dy = 2;
+  var dy = 1;
 
   nodeEnter.append("text")
     .attr("id", function(d) {  return "text-name"; })
     .attr("x", function(d) { return d.children || d._children ? 0 : 0; })
-    .attr("dy", "-" + dy.toString() + "em")
-    .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
-    .text(function(d){return d.name})
+    .attr("dy", "-2em")
+    // .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
+    .attr("text-anchor", "middle")
+    .text(function(d){ 
+      if (d.name != "") {
+        return d.name;
+      } else {
+        return d.ndnName;
+      }})
     .style("fill-opacity", 1e-6)
     .style("display", "block");
 
@@ -134,8 +140,13 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
   nodeEnter.append("text")
     .attr("id", function(d) {  return "text-ndnname"; })
     .attr("dx", "-3em")
-    .attr("dy",  dy.toString() + "em")
-    .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
+    .attr("dy", function(d) { 
+      var tmpY = dy % 3 + 2;
+      dy++;
+      return tmpY.toString() + "em";
+    })
+    // .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
+    .attr("text-anchor", "middle")
     .text(function(d){return d.ndnName})
     .style("fill-opacity", 1e-6)
     .style("display", "block");
@@ -160,9 +171,9 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
     .style("fill-opacity", 1)
     .text(function(d){return d.name});
 
-  // nodeUpdate.select("#text-ndnname")
-  //   .style("fill-opacity", 1)
-  //   .text(function(d){return d.ndnName});
+  nodeUpdate.select("#text-ndnname")
+    .style("fill-opacity", 1)
+    .text(function(d){return d.ndnName});
 
   // Transition exiting nodes to the parent's new position.
   var nodeExit = node.exit().transition()
@@ -222,9 +233,13 @@ function constructTrustModelTree(data) {
 function insertToTrustRelationshipTree(root, data) {
 
   var cNodeNameString = data.getName().toUri();
-  var pNodeNameString = data.getSignature().getKeyLocator().getKeyName().toUri()
-  var pNode = findNodeInTree(root, pNodeNameString);
+  var pNodeNameString = data.getSignature().getKeyLocator().getKeyName().toUri();
   
+  console.log("[trust] child: " + cNodeNameString +" ,parent: " + pNodeNameString);
+  
+  var pNode = findNodeInTree(root, pNodeNameString);
+  console.log("[trust] found pNode: ", pNode);
+
   if (pNode.ndnName == "/") {
     //if the parent node is the root, there is not parent name found, add a new branch
     var newNode = {
@@ -239,12 +254,13 @@ function insertToTrustRelationshipTree(root, data) {
       ]
     }
 
-    pNode.children.append(newNode);
+    pNode.children.push(newNode);
 
   } else {
     //the parent node exists in the tree
     doesChildExist = false;
-    for (var child in pNode.children){
+    for (var i in pNode.children){
+      var child = pNode.children[i];
       if (child.ndnName == cNodeNameString) {
         doesChildExist = true;
         break;
@@ -258,23 +274,31 @@ function insertToTrustRelationshipTree(root, data) {
         "children" : []
       }
 
-      pNode.children.append(newNode);
+      pNode.children.push(newNode);
     }
   }
+
+  if (svgTrustRelationshipTree)
+    updateTrustTree(trustRelationshipRoot, trustRelationshipTree, trustRelationshipRoot, svgTrustRelationshipTree);
 }
 
 //find the parent node in the tree with the dataNameString
 function findNodeInTree(root, dataNameString) {
 
   curNode = root;
+  console.log("enter find node in tree: ", curNode);
 
   while (curNode.children.length > 0) {
-    for (var child in curNode.children) {
+    
+    for (var i in curNode.children) {
+        var child = curNode.children[i];
+        console.log("search child: ", child);
         if (child.ndnName == dataNameString) {
-          return child.parent;
+          return child;
         } else {
           return findNodeInTree(child, dataNameString);
         }
     }
   }
+  return curNode;
 }
