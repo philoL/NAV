@@ -103,8 +103,8 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
   // Enter any new nodes at the parent's previous position.
   var nodeEnter = node.enter().append("g")
     .attr("class", "node")
-    .attr("transform", function(d) { 
-      return "translate(" + source.y + "," + source.x + ")"; 
+    .attr("transform", function(d) {
+      return "translate(" + source.y + "," + source.x + ")";
     })
     .on("click", click)
     .on("dblclick", doubleClick);
@@ -117,7 +117,7 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
       }
       return trustColorSet[d.depth % trustColorSet.length];
     });
-  
+
   // append name text on top of the nodes
   var dy = 1;
 
@@ -127,7 +127,7 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
     .attr("dy", "-2em")
     // .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
     .attr("text-anchor", "middle")
-    .text(function(d){ 
+    .text(function(d){
       if (d.name != "") {
         return d.name;
       } else {
@@ -139,9 +139,9 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
   // append ndnname text on botom of the nodes
   nodeEnter.append("text")
     .attr("id", function(d) {  return "text-ndnname"; })
-    .attr("dx", "-3em")
-    .attr("dy", function(d) { 
-      var tmpY = dy % 3 + 2;
+    // .attr("dx", "-3em")
+    .attr("dy", function(d) {
+      var tmpY = (dy % 2 + 1)*1.5;
       dy++;
       return tmpY.toString() + "em";
     })
@@ -154,8 +154,8 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
   // Transition nodes to their new position.
   var nodeUpdate = node.transition()
     .duration(duration)
-    .attr("transform", function(d) { 
-      return "translate(" + d.y + "," + d.x + ")"; 
+    .attr("transform", function(d) {
+      return "translate(" + d.y + "," + d.x + ")";
     });
 
   nodeUpdate.select("circle")
@@ -166,7 +166,7 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
       }
       return '#fff';
     });
-  
+
   nodeUpdate.select("#text-name")
     .style("fill-opacity", 1)
     .text(function(d){return d.name});
@@ -219,7 +219,7 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
 function constructTrustModelTree(data) {
 
   var dataName = data.getName();
-  
+
   if (!dataName.toUri().includes("TrustModel")) {
     console.log("Wrong Data packet for Trust model");
     return;
@@ -234,9 +234,13 @@ function insertToTrustRelationshipTree(root, data) {
 
   var cNodeNameString = data.getName().toUri();
   var pNodeNameString = data.getSignature().getKeyLocator().getKeyName().toUri();
-  
+
   console.log("[trust] child: " + cNodeNameString +" ,parent: " + pNodeNameString);
-  
+
+  if (pNodeNameString == "/"){
+    return;
+  }
+
   var pNode = findNodeInTree(root, pNodeNameString);
   console.log("[trust] found pNode: ", pNode);
 
@@ -289,7 +293,7 @@ function findNodeInTree(root, dataNameString) {
   console.log("enter find node in tree: ", curNode);
 
   while (curNode.children.length > 0) {
-    
+
     for (var i in curNode.children) {
         var child = curNode.children[i];
         console.log("search child: ", child);

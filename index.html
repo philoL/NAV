@@ -49,7 +49,7 @@
   <div id="header">
     <h1>NDN Application Visualizer</h1>
   </div>
-  
+
   <div id="menu">
     <ul>
       <li>
@@ -69,45 +69,45 @@
   <div id="connect-section">
     <table>
       <tr>
-        <td>Host face:</td> 
+        <td>Host face:</td>
         <td><input type="text" id="host" value="128.97.98.7" style="width:115px;"></input></td>
       </tr>
       <tr>
-        <td>Track prefix:</td> 
+        <td>Track prefix:</td>
         <td><input type="text" id="prefix" value="/org/openmhealth" style="width:115px;"></input></td>
       </tr>
     </table>
     <button style="margin-left:112px;margin-right:0px;" id="connect" onclick="connectFace()">Connect Face</button>
   </div>
- 
+
   <div id="options-section" style="float:left;">
     <table>
       <tr>
-        <td>Max tree depth:</td> 
+        <td>Max tree depth:</td>
         <td><input type="text" id="max-depth" value="-1"></input></td>
       </tr>
       <tr>
-        <td>Interest expression interval:</td> 
-        <td><input type="text" id="default-wait-time" value="100"></input></td>
+        <td>Interest expression interval:</td>
+        <td><input type="text" id="default-wait-time" value="1000"></input></td>
       </tr>
       <tr>
-        <td>Display name cutoff length:</td>   
+        <td>Display name cutoff length:</td>
         <td><input type="text" id="cut-off-length" value="-1"></input></td>
       </tr>
       <tr>
-        <td>Max branching factor:</td>   
+        <td>Max branching factor:</td>
         <td><input type="text" id="max-branching-factor" value="-1"></input></td>
       </tr>
       <tr>
-        <td>Fresh data only:</td> 
+        <td>Fresh data only:</td>
         <td><input type="checkbox" id="fresh-data" checked></input></td>
       </tr>
       <tr>
-        <td>Remove stale data:</td> 
+        <td>Remove stale data:</td>
         <td><input type="checkbox" id="remove-stale-data" onclick="removeStaleData(this)"></input></td>
       </tr>
       <tr>
-        <td>Show trust relationship:</td> 
+        <td>Show trust relationship:</td>
         <td><input type="checkbox" id="show-trust-relationship" onclick="toggleTrustRelationship(this)"></input></td>
       </tr>
     </table>
@@ -120,16 +120,16 @@
     <p><button style="width:115px;" onclick="fullScreen()" id="full-screen">View Full Screen</button></p>
   </div>
   </div>
-  
+
   <!-- TREE -->
   <div id="view-container" style="clear:both;">
     <!-- <div id="view"></div> -->
   </div>
- 
+
   <!-- BOTTOM -->
   <br/>
   <br/>
- 
+
   <div id="bottom-left"></div>
   <div id="bottom-right"></div>
   <div id="bottom">
