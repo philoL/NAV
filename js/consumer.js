@@ -34,7 +34,7 @@ function connectFace() {
     maxBranchingFactor = parseInt(maxBranchingFactor);
   }
 
-  document.getElementById('pause').onclick = function () { 
+  document.getElementById('pause').onclick = function () {
     if (paused) {
       document.getElementById('pause').innerText = "Pause";
       paused = false;
@@ -52,7 +52,7 @@ function connectFace() {
   var host = document.getElementById("host").value;
   face = new Face({"host": host});
   prefix = document.getElementById("prefix").value;
-  
+
   expressInterestWithExclusion(new Name(prefix));
   expressInterestFromQueue();
 }
@@ -165,7 +165,7 @@ function buildDummyTree() {
       dataName.append(getRandomChar());
     }
     var data = new Data(dataName);
-    if (!paused) {    
+    if (!paused) {
       console.log("Dummy: adding data name " + dataName.toUri());
       insertToTree(nameRoot, data);
       setTimeout(function () {
@@ -175,7 +175,7 @@ function buildDummyTree() {
     }
   }, 2000);
 
-  document.getElementById('pause').onclick = function () { 
+  document.getElementById('pause').onclick = function () {
     if (paused) {
       document.getElementById('pause').innerText = "Pause";
       paused = false;
@@ -213,7 +213,7 @@ function onData(interest, data) {
   if (dataName.size() == 0) {
     return;
   }
-  
+
   // we block multiple data with the same name from being displayed in the tree here
   if (receivedContent[dataName.toUri()] === undefined) {
     var addedContentNode = insertToTree(nameRoot, data);
@@ -228,7 +228,7 @@ function onData(interest, data) {
     insertToTrustRelationshipTree(trustRelationshipRoot, data);
 
     // try {
-    //   // no matter if showTrustRelationship is toggled, we leave a trace for trust relationship links 
+    //   // no matter if showTrustRelationship is toggled, we leave a trace for trust relationship links
     //   var signature = data.getSignature();
     //   if (signature !== null && signature !== undefined) {
     //     if (KeyLocator.canGetFromSignature(signature)) {
@@ -273,7 +273,7 @@ function onData(interest, data) {
     //   delete pendingTrustLinks[dataNameUriWithoutLastUri];
     // }
   }
-  
+
   if (removeStaleFlag === true) {
     setTimeout(function() {
       removeFromTree(data);
@@ -294,7 +294,7 @@ function onData(interest, data) {
       // as the last element
       var lastComponent = dataName.get(-1);
       try {
-        // version 
+        // version
         var version = lastComponent.toVersion();
         console.log("finished probing this branch (data ending with version): " + interestName.toUri());
         return;
@@ -308,7 +308,7 @@ function onData(interest, data) {
         return;
       } catch (exception) {
 
-      } 
+      }
       try {
         // pure number
         var numbers = lastComponent.toEscapedString();
@@ -326,11 +326,11 @@ function onData(interest, data) {
         }
       } catch (exception) {
 
-      } 
+      }
     }
 
     var component = dataName.get(interestName.size());
-    
+
     // ask for the next piece of data excluding the last component
     var exclusion = interest.getExclude();
     if (exclusion === undefined || exclusion === null) {
@@ -339,8 +339,8 @@ function onData(interest, data) {
     // instead of range exclusion, we use component exclusion to avoid missing some data
     exclusion.appendComponent(component);
     expressInterestWithExclusion(interestName, exclusion, true);
-    
-    // ask for the first piece of data in a subnamespace, 
+
+    // ask for the first piece of data in a subnamespace,
     // this data will be able to satisfy the interest, in that case, the next exclusion interest should fetch later data in that branch
     var newPrefix = new Name(dataName.getPrefix(interestName.size() + 1));
     console.log("new prefix: " + newPrefix.toUri());
@@ -373,7 +373,7 @@ function sausageUnitTest() {
   insertToTree(nameRoot, data2);
   var data3 = new Data(new Name("/c/b/d"));
   insertToTree(nameRoot, data3);
-  
+
   // var couplingParent1 = tree.nodes(nameRoot).filter(function(d) {
   //   return d['name'] === '/';
   // })[0];

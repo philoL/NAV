@@ -2,11 +2,11 @@
 
 initial();
 
-
 function initial(){
   createNameTreeSvg();
 
-
+  //construct trust model data structure;
+  //#hardcode the trust model for open mhealth
    var trustModelObj = [
     {
     "name" : "OpenmHealth",
@@ -33,24 +33,69 @@ function initial(){
   var dataTM = new Data(new Name("/org/openmhealth/TrustModel"));
   dataTM.setContent(JSON.stringify(trustModelObj));
   constructTrustModelTree(dataTM);
+
+  //construct access control policy data structure
+  accessControlObj = {
+    "meta" : {
+      "userList" : ["Haitao", "Teng"],
+      "activityTypeList" : ["Fitness"],
+      "activityList" : ["Step", "Heart Rate"],
+      "locationList" : ["Home", "Hospital"]
+    },
+    "accessList" : [
+      {
+        "user" : "Haitao",
+        "accessDetails" : [
+          {
+            "username" : "Alice",
+            "ndnName" : "/org/openmhealth/user-123",
+            "access" : [
+               {"gradularity": "/fitness/step", "start": "1355752800000", "end" :"1355759900000"},
+               {"gradularity": "/fitness/step", "start": "1355767900000", "end" :"1355774400000"}
+            ]
+          },
+          {
+            "username" : "Bob",
+            "ndnName" : "/org/openmhealth/user-456",
+            "access" : [
+              {"gradularity": "/fitness", "start": "1355759910000", "end" :"1355761900000"}
+            ]
+          },
+          {
+            "username" : "Carol",
+            "ndnName" : "/org/openmhealth/user-789",
+            "access" : [
+              {"gradularity": "/fitness/heartrate", "start": "1355761910000", "end" :"1355763910000"}
+            ]
+          }
+        ]
+      }
+    ]
+  }
+
 }
 
 
 function showNameTree(){
   d3.select("svg#trustModel").remove();
   d3.select("svg#trustRelationship").remove();
+  d3.select("svg#accessControlOverview").remove();
+  d3.select("svg#accessControlTimeline").remove();
+  d3.select("svg#accessControlDetails").remove();
 
   var elem = document.getElementById("nameTree");
   if (elem == null) {
     createNameTreeSvg();
   }
-  
-}
 
+}
 
 function showTrustView(){
   d3.select("svg#nameTree").remove();
-  
+  d3.select("svg#accessControlOverview").remove();
+  d3.select("svg#accessControlTimeline").remove();
+  d3.select("svg#accessControlDetails").remove();
+
   var elem = document.getElementById("trustModel");
   if (elem == null) {
     createTrustSvgs();
@@ -60,5 +105,13 @@ function showTrustView(){
 
 function showAccessControlView(){
 
-  console.log("callback.toString()");
+  d3.select("svg#trustModel").remove();
+  d3.select("svg#trustRelationship").remove();
+  d3.select("svg#nameTree").remove();
+
+  var elem = document.getElementById("accessControlOverview");
+  if (elem == null) {
+    createAccessControlSvgs();
+  }
 }
+

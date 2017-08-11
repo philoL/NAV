@@ -5,7 +5,7 @@ var trustModelData = [
   {
     "name": "null",
     "ndnName": "null",
-    "children": []
+    "children": new Array()
   }
 ];
 
@@ -14,7 +14,7 @@ var trustRelationshipData = [
     "name": "",
     "ndnName": "/",
     "parent": "null",
-    "children": []
+    "children": new Array()
   }
 ];
 
@@ -243,6 +243,9 @@ function insertToTrustRelationshipTree(root, data) {
 
   var pNode = findNodeInTree(root, pNodeNameString);
   console.log("[trust] found pNode: ", pNode);
+  if (pNode.ndnName != pNodeNameString) {
+    pNode = trustRelationshipRoot;
+  }
 
   if (pNode.ndnName == "/") {
     //if the parent node is the root, there is not parent name found, add a new branch
@@ -253,7 +256,7 @@ function insertToTrustRelationshipTree(root, data) {
         {
           "name" : "",
           "ndnName" : cNodeNameString,
-          "children" : []
+          "children" : new Array()
         }
       ]
     }
@@ -262,7 +265,7 @@ function insertToTrustRelationshipTree(root, data) {
 
   } else {
     //the parent node exists in the tree
-    doesChildExist = false;
+    var doesChildExist = false;
     for (var i in pNode.children){
       var child = pNode.children[i];
       if (child.ndnName == cNodeNameString) {
@@ -275,7 +278,7 @@ function insertToTrustRelationshipTree(root, data) {
       var newNode = {
         "name" : "",
         "ndnName" : cNodeNameString,
-        "children" : []
+        "children" : new Array()
       }
 
       pNode.children.push(newNode);
@@ -290,7 +293,11 @@ function insertToTrustRelationshipTree(root, data) {
 function findNodeInTree(root, dataNameString) {
 
   curNode = root;
-  console.log("enter find node in tree: ", curNode);
+  console.log("find: ", dataNameString , " starting with node: ", curNode);
+
+  if (curNode.children === undefined) {
+    curNode.children = [];
+  }
 
   while (curNode.children.length > 0) {
 
