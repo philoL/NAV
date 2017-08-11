@@ -22,9 +22,12 @@ var accessControlTimelineData = [
       {label: "Caros", times: [{"color":"#ff9900", "starting_time": 1355761910000, "ending_time": 1355763910000}]}
     ];
 
+//color set
+var rectColorSet = ["#cccccc", "#109618"]
+
 //svgs
 var svgAccessControlOverview,
-	svgAccessControlTimeline,
+	  svgAccessControlTimeline,
     svgAccessControlDetails;
 
 //rect
@@ -144,23 +147,23 @@ function createAccessControlSvgs() {
   	.attr("x", 0)
   	.attr("y", function(d) { var newY=10+rectHeight*i; ++i; return newY; })
   	.attr("width", rectWidth)
-	.attr("height", rectHeight)
-	.attr("stroke","black")
-	.attr("stroke-width","1")
-	.attr("fill", "white")
-	.on("click", selectACRect);
+	  .attr("height", rectHeight)
+    .attr("fill", "white")
+  	.attr("stroke","black")
+  	.attr("stroke-width","1")
+    .on("click", selectACRect);
 
   var i = 0;
   d3.select("g#activity")
   	.selectAll("text#activity")
   	.data(accessControlObj.meta.activityList)
   	.enter()
-	.append("text")
-	.attr("id", "user")
-	.attr("x", textX)
- 	.attr("y", function(d) { var newY=textY+rectHeight*i; ++i; return newY; })
- 	.attr("font-size", "12px")
-	.text( function(d) {return d.name});
+  	.append("text")
+  	.attr("id", "user")
+  	.attr("x", textX)
+   	.attr("y", function(d) { var newY=textY+rectHeight*i; ++i; return newY; })
+   	.attr("font-size", "12px")
+  	.text( function(d) {return d.name});
 
   //add g.location
   svgAccessControlOverview.append("g")
@@ -202,7 +205,7 @@ function createAccessControlSvgs() {
   d3.selectAll("rect")
 	.transition()
 	.duration(800)
-	.attr("width", rectWidth);
+	.attr("fill", rectColorSet[0]);
 
 
   //add time line
@@ -212,6 +215,12 @@ function createAccessControlSvgs() {
     .stack() // toggles graph stacking
     .margin({left:70, right:30, top:0, bottom:0})
     ;
+
+  accessControlTimelineData = [
+      {label: "", times: [{"color":"white", "starting_time": 1355752800000, "ending_time": 1355759900000}]},
+      {label: "", times: [{"color":"white", "starting_time": 1355759910000, "ending_time": 1355761900000}]},
+      {label: "", times: [{"color":"white", "starting_time": 1355761910000, "ending_time": 1355763910000}]}
+  ];
 
   svgAccessControlTimeline = d3.select("#view-container").append("svg")
   	.attr("id", "accessControlTimeline")
@@ -239,9 +248,9 @@ function createAccessControlSvgs() {
 }
 
 var selectACRect = (function(){
-   var currentColor = "white";
+   var currentColor = rectColorSet[0];
     return function(){
-        currentColor = currentColor == "white" ? "#cccccc" : "white";
+        currentColor = currentColor == rectColorSet[0] ? rectColorSet[1] : rectColorSet[0];
         d3.select(this).style("fill", currentColor);
     }
 })();
