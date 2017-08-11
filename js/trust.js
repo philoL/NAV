@@ -91,8 +91,6 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
   var nodes = myTree.nodes(myRoot).reverse(),
       links = myTree.links(nodes);
 
-  console.log(nodes);
-
   // Normalize for fixed-depth.
   nodes.forEach(function(d) { d.y = d.depth * 120; });
 
@@ -115,7 +113,7 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
       if (d.is_content) {
         return dataNodeColor;
       }
-      return trustColorSet[d.depth % trustColorSet.length];
+      return colorSet[d.depth % colorSet.length];
     });
 
   // append name text on top of the nodes

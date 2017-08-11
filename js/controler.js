@@ -37,10 +37,12 @@ function initial(){
   //construct access control policy data structure
   accessControlObj = {
     "meta" : {
-      "userList" : ["Haitao", "Teng"],
-      "activityTypeList" : ["Fitness"],
-      "activityList" : ["Step", "Heart Rate"],
-      "locationList" : ["Home", "Hospital"]
+      "userList" : [{"name":"Haitao", "ndnName":"haitao"},
+                    {"name":"Teng", "ndnName":"teng"}],
+      "activityTypeList" : [{"name" : "Fitness", "ndnName":"fitness"}],
+      "activityList" : [{"name":"Step", "ndnName":"step"}, 
+                        {"name":"Heart Rate", "ndnName":"heartrate"}],
+      "locationList" : []
     },
     "accessList" : [
       {

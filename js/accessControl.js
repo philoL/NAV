@@ -16,10 +16,10 @@ var margin = {top: 20, right: 120, bottom: 20, left: 120},
     accessControlDetailsHeight= accessControlDetailsHeightTotal - margin.top - margin.bottom;
 
 var accessControlTimelineData = [
-      {label: "Alice", times: [{"color":"blue", "starting_time": 1355752800000, "ending_time": 1355759900000},
-                                  {"color":"blue", "starting_time": 1355767900000, "ending_time": 1355774400000}]},
-      {label: "Bob", times: [{"color":"pink", "starting_time": 1355759910000, "ending_time": 1355761900000}, ]},
-      {label: "Caros", times: [{"color":"yellow", "starting_time": 1355761910000, "ending_time": 1355763910000}]}
+      {label: "Alice", times: [{"color":"#3366cc", "starting_time": 1355752800000, "ending_time": 1355759900000},
+                                  {"color":"#3366cc", "starting_time": 1355767900000, "ending_time": 1355774400000}]},
+      {label: "Bob", times: [{"color":"#dc3912", "starting_time": 1355759910000, "ending_time": 1355761900000}, ]},
+      {label: "Caros", times: [{"color":"#ff9900", "starting_time": 1355761910000, "ending_time": 1355763910000}]}
     ];
 
 //svgs
@@ -30,6 +30,10 @@ var svgAccessControlOverview,
 //rect
 var rectWidth = 100;
 var rectHeight = 30;
+
+//text in rect
+var textX = 25;
+var textY = 28;
 
 //data structure for access control overview
 var accessControlObj;
@@ -81,10 +85,10 @@ function createAccessControlSvgs() {
   	.enter()
 	.append("text")
 	.attr("id", "user")
-	.attr("x", 5)
- 	.attr("y", function(d) { var newY=20+rectHeight*i; ++i; return newY; })
+	.attr("x", textX)
+ 	.attr("y", function(d) { var newY=textY+rectHeight*i; ++i; return newY; })
  	.attr("font-size", "12px")
-	.text( function(d) {return d});
+	.text( function(d) {return d.name});
 
   //add g.activityType
   svgAccessControlOverview.append("g")
@@ -117,10 +121,10 @@ function createAccessControlSvgs() {
   	.enter()
 	.append("text")
 	.attr("id", "user")
-	.attr("x", 5)
- 	.attr("y", function(d) { var newY=20+rectHeight*i; ++i; return newY; })
+	.attr("x", textX)
+ 	.attr("y", function(d) { var newY=textY+rectHeight*i; ++i; return newY; })
  	.attr("font-size", "12px")
-	.text( function(d) {return d});
+	.text( function(d) {return d.name});
 
   //add g.activity
   var gActivity = svgAccessControlOverview.append("g")
@@ -153,10 +157,10 @@ function createAccessControlSvgs() {
   	.enter()
 	.append("text")
 	.attr("id", "user")
-	.attr("x", 2)
- 	.attr("y", function(d) { var newY=20+rectHeight*i; ++i; return newY; })
+	.attr("x", textX)
+ 	.attr("y", function(d) { var newY=textY+rectHeight*i; ++i; return newY; })
  	.attr("font-size", "12px")
-	.text( function(d) {return d});
+	.text( function(d) {return d.name});
 
   //add g.location
   svgAccessControlOverview.append("g")
@@ -189,10 +193,10 @@ function createAccessControlSvgs() {
   	.enter()
 	.append("text")
 	.attr("id", "user")
-	.attr("x", 2)
- 	.attr("y", function(d) { var newY=20+rectHeight*i; ++i; return newY; })
+	.attr("x", textX)
+ 	.attr("y", function(d) { var newY=textY+rectHeight*i; ++i; return newY; })
  	.attr("font-size", "12px")
-	.text( function(d) {return d});
+	.text( function(d) {return d.name});
 
   //transition
   d3.selectAll("rect")
@@ -236,10 +240,8 @@ function createAccessControlSvgs() {
 
 var selectACRect = (function(){
    var currentColor = "white";
-   console.log(currentColor);
     return function(){
         currentColor = currentColor == "white" ? "#cccccc" : "white";
-        console.log(currentColor);
         d3.select(this).style("fill", currentColor);
     }
 })();
