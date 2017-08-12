@@ -135,6 +135,8 @@
     var appendBackgroundBar = function (yAxisMapping, index, g, data, datum) {
       var greenbarYAxis = ((itemHeight + itemMargin) * yAxisMapping[index]) + margin.top;
       g.selectAll("svg").data(data).enter()
+        .transition()
+        .duration(800)
         .insert("rect")
         .attr("class", "row-green-bar")
         .attr("x", fullLengthBackgrounds ? 0 : margin.left)
