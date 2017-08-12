@@ -27,7 +27,7 @@ var trustNodeColor = "#AAAAAA";
 var trustModelWidthTotal = 4000;
 var trustModelHeightTotal = 150;
 var trustRelationshipWidthTotal = 4000;
-var trustRelationshipHeightTotal = 500;
+var trustRelationshipHeightTotal = 654;
 //document.body.clientHeight - document.getElementById("connect-section").offsetHeight- document.getElementById("option-section").offsetHeight;
 
 var margin = {top: 20, right: 120, bottom: 20, left: 120},

@@ -5,7 +5,7 @@ var accessControlOverviewHeightTotal = 150;
 var accessControlTimelineWidthTotal = 800;
 var accessControlTimelineHeightTotal = 160;
 var accessControlDetailsWidthTotal = 4000;
-var accessControlDetailsHeightTotal = 600;
+var accessControlDetailsHeightTotal = 654;
 
 var margin = {top: 20, right: 120, bottom: 20, left: 120},
     accessControlOverviewWidth = accessControlOverviewWidthTotal - margin.right - margin.left,
