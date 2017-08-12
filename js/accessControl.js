@@ -5,7 +5,7 @@ var accessControlOverviewHeightTotal = 150;
 var accessControlTimelineWidthTotal = 800;
 var accessControlTimelineHeightTotal = 160;
 var accessControlDetailsWidthTotal = 4000;
-var accessControlDetailsHeightTotal = 500;
+var accessControlDetailsHeightTotal = 600;
 
 var margin = {top: 20, right: 120, bottom: 20, left: 120},
     accessControlOverviewWidth = accessControlOverviewWidthTotal - margin.right - margin.left,
@@ -66,6 +66,9 @@ var acQuery = {};
 
 //onClick functions
 var selectACRect;
+
+//data structure for access control tree
+var acTreeRoot;
 
 //init svgs
 function createAccessControlSvgs() {
@@ -149,7 +152,7 @@ function createAccessControlSvgs() {
   //transition
   d3.selectAll("rect")
   .transition()
-  .duration(800)
+  .duration(500)
   .attr("fill", rectColorSet[0]);
 }
 
@@ -318,32 +321,50 @@ function filterAccessControlTimelineDataByQuery() {
 
 
   accessControlTimelineData = [];
-  if (filterRule == "") return;
+  if (filterRule == "") {
+    //donothing
+  } else {
+    for (var i in accessControlObj["accessList"]) { 
+      //access details for each user
+      var userAccessDetailsEntry = accessControlObj["accessList"][i];
 
-  for (var i in accessControlObj["accessList"]) { 
-    //access details for each user
-    var userAccessDetailsEntry = accessControlObj["accessList"][i];
-
-    if (userAccessDetailsEntry["user"] == filterUser) {
-      var accessDetails = userAccessDetailsEntry["accessDetails"];
-      for (var j in accessDetails){
-        //create an entry for accessControlTimelineData
-        var newEntry = new TimelineEntry(accessDetails[j]["username"]);
-        
-        for (var k in accessDetails[j]["access"]) {
-          //add time entry 
-          var curAccess = accessDetails[j]["access"][k];
+      if (userAccessDetailsEntry["user"] == filterUser) {
+        var accessDetails = userAccessDetailsEntry["accessDetails"];
+        for (var j in accessDetails){
+          //create an entry for accessControlTimelineData
+          var newEntry = new TimelineEntry(accessDetails[j]["username"]);
           
-          if (filterRule.startsWith(curAccess["gradularity"])) {
-            var newTimeEntry = new TimelineTimeEntry(colorSet[j], curAccess["start"], curAccess["end"]);
-            newEntry.addTimeEntry(newTimeEntry);
+          for (var k in accessDetails[j]["access"]) {
+            //add time entry 
+            var curAccess = accessDetails[j]["access"][k];
+            
+            if (filterRule.startsWith(curAccess["gradularity"])) {
+              var newTimeEntry = new TimelineTimeEntry(colorSet[j], curAccess["start"], curAccess["end"]);
+              newEntry.addTimeEntry(newTimeEntry);
+            }
           }
-        }
 
-        accessControlTimelineData.push(newEntry);
-        console.log("add an new entry: ", newEntry);
+          accessControlTimelineData.push(newEntry);
+          console.log("add an new entry: ", newEntry);
+        }
       }
     }
+  }
+
+  //update access control tree
+  if (filterUser) {
+    console.log("update ac tree: ", filterUser);
+    acTreeRoot = findNodeInNameTree(nameRoot, filterUser);
+
+    console.log("\n found node: ", acTreeRoot);
+    if (acTreeRoot === null) {
+      acTreeRoot = {
+        "depth" : 1,
+        "children" : [],
+        "components" : [filterUser]
+      };
+    }
+    updateAccessControlTree(acTreeRoot);
   }
 }
 
@@ -412,3 +433,113 @@ var selectACRect = (function(){
         .attr("fill", currentColor);
     }
 })();
+
+
+function updateAccessControlTree(source) {
+  // Compute the new tree layout.
+  var nodes = tree.nodes(acTreeRoot).reverse(),
+      links = tree.links(nodes);
+
+  // Normalize for fixed-depth.
+  nodes.forEach(function(d) { d.y = d.depth * 120; });
+
+  // Update the nodes
+  var node = svgAccessControlDetails.selectAll("g.node")
+    .data(nodes, function(d) { return d.id || (d.id = ++i); });
+
+  // Enter any new nodes at the parent's previous position.
+  var nodeEnter = node.enter().append("g")
+    .attr("class", "node")
+    .attr("transform", function(d) { 
+      return "translate(" + source.y + "," + source.x + ")"; 
+    })
+    .on("click", click)
+    .on("dblclick", doubleClick);
+
+  nodeEnter.append("circle")
+    .attr("r", 1e-6)
+    .style("fill", function(d) {
+      if (d.is_content) {
+        return dataNodeColor;
+      }
+      return colorSet[d.depth % colorSet.length + 2];
+    });
+  
+  // append text on top of the nodes
+  var dy = getRandomInt(1, 3);
+
+  nodeEnter.append("text")
+    .attr("id", function(d) {  return "text-name-" + d.id.toString(); })
+    .attr("x", function(d) { return d.children || d._children ? 0 : 0; })
+    .attr("dy", "-" + dy.toString() + "em")
+    .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
+    .text(updateText)
+    .style("fill-opacity", 1e-6)
+    .style("display", "block");
+
+  // Transition nodes to their new position.
+  var nodeUpdate = node.transition()
+    .duration(duration)
+    .attr("transform", function(d) { 
+      return "translate(" + d.y + "," + d.x + ")"; 
+    });
+
+  nodeUpdate.select("circle")
+    .attr("r", 10)
+    .style("stroke", function(d) {
+      if (d._children) {
+        return "#000";
+      }
+      return '#fff';
+    });
+  
+  nodeUpdate.select("text")
+    .style("fill-opacity", 1)
+    .text(updateText);
+
+  // Transition exiting nodes to the parent's new position.
+  var nodeExit = node.exit().transition()
+    .duration(duration)
+    .attr("transform", function(d) {
+      return "translate(" + source.y + "," + source.x + ")";
+    })
+    .remove();
+
+  nodeExit.select("circle")
+    .attr("r", 1e-6);
+
+  nodeExit.select("text")
+    .style("fill-opacity", 1e-6);
+
+  // Update the links
+  var link = svgAccessControlDetails.selectAll("path.link")
+    .data(links, function(d) { return d.target.id; });
+
+  // Enter any new links at the parent's previous position.
+  link.enter().insert("path", "g")
+    .attr("class", "link")
+    .attr("d", function(d) {
+      var o = {x: source.x, y: source.y};
+      return diagonal({source: o, target: o});
+    });
+
+  // Transition links to their new position.
+  link.transition()
+    .duration(duration)
+    .attr("d", diagonal);
+
+  // Transition exiting nodes to the parent's new position.
+  link.exit().transition()
+    .duration(duration)
+    .attr("d", function(d) {
+      var o = {x: source.x, y: source.y};
+      return diagonal({source: o, target: o});
+    })
+    .remove();
+
+  // Stash the old positions for transition.
+  // nodes.forEach(function(d) {
+  //   d.x0 = d.x;
+  //   d.y0 = d.y;
+  // });
+}

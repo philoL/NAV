@@ -240,6 +240,9 @@ function insertToTrustRelationshipTree(root, data) {
   }
 
   var pNode = findNodeInTree(root, pNodeNameString);
+  if (pNode == null) {
+    pNode = root;
+  }
   console.log("[trust] found pNode: ", pNode);
   if (pNode.ndnName != pNodeNameString) {
     pNode = trustRelationshipRoot;
@@ -288,26 +291,17 @@ function insertToTrustRelationshipTree(root, data) {
 }
 
 //find the parent node in the tree with the dataNameString
-function findNodeInTree(root, dataNameString) {
-
-  curNode = root;
-  console.log("find: ", dataNameString , " starting with node: ", curNode);
-
-  if (curNode.children === undefined) {
-    curNode.children = [];
-  }
-
-  while (curNode.children.length > 0) {
-
-    for (var i in curNode.children) {
-        var child = curNode.children[i];
-        console.log("search child: ", child);
-        if (child.ndnName == dataNameString) {
-          return child;
-        } else {
-          return findNodeInTree(child, dataNameString);
-        }
+function findNodeInTree(node, dataNameString) {
+  console.log("[trust] findNodeInTree node: ", node, " dataNameString: ", dataNameString);
+  if (node.ndnName == dataNameString) {
+    return node;
+  } else {
+    for (var i in node.children) {
+      var child = node.children[i];
+      var result = findNodeInTree(child, dataNameString);
+      if (result != null) 
+        return result;
     }
   }
-  return curNode;
+  return null;
 }
