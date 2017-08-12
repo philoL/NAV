@@ -46,7 +46,7 @@ function initial(){
     },
     "accessList" : [
       {
-        "user" : "Haitao",
+        "user" : "haitao",
         "accessDetails" : [
           {
             "username" : "Alice",

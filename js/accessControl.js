@@ -35,6 +35,25 @@ var textY = 28;
 var accessControlObj;
 
 //data structure for timeline
+class TimelineEntry {
+  constructor(label) {
+    this.label = label;
+    this.times = [];
+  }
+
+  addTimeEntry(timeEntry){
+    this.times.push(timeEntry);
+  }
+}
+
+class TimelineTimeEntry {
+  constructor(color, startTime, endTime) {
+    this.color = color;
+    this.starting_time = startTime;
+    this.ending_time = endTime;
+  }
+}
+
 var accessControlTimelineData = [
       {label: "Alice", times: [{"color":"#3366cc", "starting_time": 1355752800000, "ending_time": 1355759900000},
                                   {"color":"#3366cc", "starting_time": 1355767900000, "ending_time": 1355774400000}]},
@@ -277,7 +296,55 @@ function updateAccessControlTimeline(){
 }
 
 function filterAccessControlTimelineDataByQuery() {
+  var filterUser = acQuery["user"];
+  var filterActivityType = acQuery["activityType"];
+  var filterActivity = acQuery["activity"];
+
+  if (!filterActivity) {
+    filterActivity = "";
+  }
+
+  var filterRule = "";
+  if (filterActivityType) {
+    if (!filterActivity)
+      filterRule = "/"+filterActivityType;
+    else
+      filterRule = "/"+filterActivityType+"/"+filterActivity;
+  }
+  
   console.log(acQuery);
+  console.log(filterUser);
+  console.log(filterRule);
+
+
+  accessControlTimelineData = [];
+  if (filterRule == "") return;
+
+  for (var i in accessControlObj["accessList"]) { 
+    //access details for each user
+    var userAccessDetailsEntry = accessControlObj["accessList"][i];
+
+    if (userAccessDetailsEntry["user"] == filterUser) {
+      var accessDetails = userAccessDetailsEntry["accessDetails"];
+      for (var j in accessDetails){
+        //create an entry for accessControlTimelineData
+        var newEntry = new TimelineEntry(accessDetails[j]["username"]);
+        
+        for (var k in accessDetails[j]["access"]) {
+          //add time entry 
+          var curAccess = accessDetails[j]["access"][k];
+          
+          if (filterRule.startsWith(curAccess["gradularity"])) {
+            var newTimeEntry = new TimelineTimeEntry(colorSet[j], curAccess["start"], curAccess["end"]);
+            newEntry.addTimeEntry(newTimeEntry);
+          }
+        }
+
+        accessControlTimelineData.push(newEntry);
+        console.log("add an new entry: ", newEntry);
+      }
+    }
+  }
 }
 
 function resetRectColorByClass(selectedClass) {
@@ -300,7 +367,6 @@ function resetRectColorByClass(selectedClass) {
 }
 
 var selectACRect = (function(){
- 
     return function(){
       // accessControlTimelineData = [
       // {label: "Alice", times: [{"color":"#3366cc", "starting_time": 1355752800000, "ending_time": 1355759900000},
