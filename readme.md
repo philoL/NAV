@@ -1,9 +1,8 @@
-Simple NDN namespace tree visualization tool (for Open mHealth, Flow, and mini-BMS).
+An NDN Application visualization tool.
 
 Issues outstanding interest with range exclusion.
 
 ### Contact
 
+* Teng Liang <philoliang@cs.arizona.edu>
 * Zhehao Wang <zhehao@cs.ucla.edu>
-* Jiusong Tang <jiusongtang1919@gmail.com>, Zhiyi Zhang <zhiyi@cs.ucla.edu>
-* Zoe Sandoval <zoe@remap.ucla.edu>
