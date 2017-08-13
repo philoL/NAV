@@ -79,7 +79,15 @@ function updateNameTree(source) {
       return "translate(" + source.y + "," + source.x + ")"; 
     })
     .on("click", click)
-    .on("dblclick", doubleClick);
+    .on("dblclick", doubleClick)
+    .on("mouseover", function(d){ console.log("over !!! " ,d); d3.select(this).selectAll("text").style("display", "block"); })
+    .on("mouseout", function(d){ 
+      if (d.textName.length < 20 || d.depth < 2) {
+        d3.select(this).selectAll("text").style("display", "block");
+      } else {
+        d3.select(this).selectAll("text").style("display", "none");
+      }
+    })
 
   nodeEnter.append("circle")
     .attr("r", 1e-6)
@@ -94,13 +102,20 @@ function updateNameTree(source) {
   var dy = getRandomInt(1, 3);
 
   nodeEnter.append("text")
-    .attr("id", function(d) {  return "text-name-" + d.id.toString(); })
+    .attr("id", function(d) {  return "nodText";})
     .attr("x", function(d) { return d.children || d._children ? 0 : 0; })
     .attr("dy", "-" + dy.toString() + "em")
     .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
     .text(updateText)
-    .style("fill-opacity", 1e-6)
-    .style("display", "block");
+    .style("fill-opacity", 1)
+    .style("display", function(d) {
+      console.log("### ", d, d.textName.length, d.depth );
+      if (d.textName.length < 20 || d.depth < 2) {
+        return "block";
+      } else {
+        return "none";
+      }
+    });
 
   // Transition nodes to their new position.
   var nodeUpdate = node.transition()
@@ -117,10 +132,16 @@ function updateNameTree(source) {
       }
       return '#fff';
     });
-  
+
   nodeUpdate.select("text")
-    .style("fill-opacity", 1)
-    .text(updateText);
+    .text(updateText)
+    .style("display", function(d) {
+      if (d.textName.length < 20 || d.depth < 2) {
+        return "block";
+      } else {
+        return "none";
+      }
+    });
 
   // Transition exiting nodes to the parent's new position.
   var nodeExit = node.exit().transition()
@@ -206,12 +227,16 @@ function getRandomInt(min, max) {
 }
 
 function updateText(d) {
-  if (cutOffLength <= 0) {
-    return d.components.join("/");
+  var name;
+
+  //for the root
+  if (d.components.length == 0) {
+    name = "/";
+  } else if (cutOffLength <= 0) {
+    name = d.components.join("/");
   } else if (d.is_content === true) {
-    return d.components.join("/");
+    name = d.components.join("/");
   } else {
-    var name = "";
     for (var idx in d.components) {
       var componentString = d.components[idx];
       if (componentString.length > cutOffLength + 3) {
@@ -220,8 +245,10 @@ function updateText(d) {
         name += componentString + "/";
       }
     }
-    return name;
   }
+
+  d["textName"] = name;
+  return name;
 }
 
 // Toggle children display on click.
@@ -246,6 +273,22 @@ function doubleClick(d) {
       textElement.style.display = "block";
     }
   }
+}
+
+function getTheMaxChildLength(node){
+  //find the maximun components length among children
+  var maxLength = 0;
+  for (var i in node.children) {
+    console.log("####", node.children[i]);
+    if (!"components" in node.children[i]) {
+      continue;
+    }
+    
+    if (node.children[i]["components"].length > maxLength)
+      maxLength = node.children[i]["components"].length;
+  }
+
+  return maxLength;
 }
 
 function findNodeInNameTree(node, dataNameString) {
@@ -356,7 +399,7 @@ function removeFromTree(data) {
     }
   }
 
-  update(nameRoot);
+  updateNameTree(nameRoot);
   return 0;
 }
 
@@ -474,7 +517,7 @@ function insertToTree(root, data, ignoreMaxBranchingDepth) {
   // append to last treeNode
   treeNode["children"].push(contentNode);
 
-  updateNameTree(root);
+  updateNameTree(nameTreeData[0]);
   return contentNode;
 }
 
