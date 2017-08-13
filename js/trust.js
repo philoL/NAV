@@ -105,7 +105,15 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
       return "translate(" + source.y + "," + source.x + ")";
     })
     .on("click", click)
-    .on("dblclick", doubleClick);
+    .on("dblclick", doubleClick)
+    .on("mouseover", function(d){ d3.select(this).selectAll("#text-ndnname").style("display", "block"); })
+    .on("mouseout", function(d){ 
+      if (d.ndnName.length < 20 || d.depth < 2 || d.name != "") {
+        d3.select(this).selectAll("#text-ndnname").style("display", "block");
+      } else {
+        d3.select(this).selectAll("#text-ndnname").style("display", "none");
+      }
+    });
 
   nodeEnter.append("circle")
     .attr("r", 1e-6)
@@ -170,8 +178,15 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
     .text(function(d){return d.name});
 
   nodeUpdate.select("#text-ndnname")
+    .text(function(d){return d.ndnName})
     .style("fill-opacity", 1)
-    .text(function(d){return d.ndnName});
+    .style("display", function(d) {
+      if (d.ndnName.length < 20 || d.depth < 2 || d.name != "") {
+        return "block";
+      } else {
+        return "none";
+      }
+    });
 
   // Transition exiting nodes to the parent's new position.
   var nodeExit = node.exit().transition()

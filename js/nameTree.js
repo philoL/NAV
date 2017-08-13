@@ -87,7 +87,7 @@ function updateNameTree(source) {
       } else {
         d3.select(this).selectAll("text").style("display", "none");
       }
-    })
+    });
 
   nodeEnter.append("circle")
     .attr("r", 1e-6)
@@ -109,7 +109,6 @@ function updateNameTree(source) {
     .text(updateText)
     .style("fill-opacity", 1)
     .style("display", function(d) {
-      console.log("### ", d, d.textName.length, d.depth );
       if (d.textName.length < 20 || d.depth < 2) {
         return "block";
       } else {
