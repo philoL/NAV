@@ -248,9 +248,13 @@ function insertToTrustRelationshipTree(root, data) {
   var cNodeNameString = data.getName().toUri();
   var pNodeNameString = data.getSignature().getKeyLocator().getKeyName().toUri();
 
-  console.log("[trust] child: " + cNodeNameString +" ,parent: " + pNodeNameString);
+  
+  // console.log("[trust] child: " + cNodeNameString +" ,parent: " + pNodeNameString);
+  
+  
 
   if (pNodeNameString == "/"){
+    console.log("[trust] child: " + cNodeNameString +" ,parent: " + pNodeNameString);
     return;
   }
 
@@ -262,6 +266,11 @@ function insertToTrustRelationshipTree(root, data) {
   if (pNode.ndnName != pNodeNameString) {
     pNode = trustRelationshipRoot;
   }
+
+  if (pNode["children"] == undefined) {
+    pNode["children"] = [];
+  }
+
 
   if (pNode.ndnName == "/") {
     //if the parent node is the root, there is not parent name found, add a new branch
@@ -276,6 +285,7 @@ function insertToTrustRelationshipTree(root, data) {
         }
       ]
     }
+
 
     pNode["children"].push(newNode);
   } else {
@@ -306,7 +316,7 @@ function insertToTrustRelationshipTree(root, data) {
 
 //find the parent node in the tree with the dataNameString
 function findNodeInTree(node, dataNameString) {
-  console.log("[trust] findNodeInTree node: ", node, " dataNameString: ", dataNameString);
+  // console.log("[trust] findNodeInTree node: ", node, " dataNameString: ", dataNameString);
   if (node.ndnName == dataNameString) {
     return node;
   } else {
