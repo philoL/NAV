@@ -107,7 +107,7 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
     .on("click", click)
     .on("dblclick", doubleClick)
     .on("mouseover", function(d){ d3.select(this).selectAll("#text-ndnname").style("display", "block"); })
-    .on("mouseout", function(d){ 
+    .on("mouseout", function(d){
       if (d.ndnName.length < 20 || d.depth < 2 || d.name != "") {
         d3.select(this).selectAll("#text-ndnname").style("display", "block");
       } else {
@@ -248,15 +248,22 @@ function insertToTrustRelationshipTree(root, data) {
   var cNodeNameString = data.getName().toUri();
   var pNodeNameString = data.getSignature().getKeyLocator().getKeyName().toUri();
 
-  
+
   // console.log("[trust] child: " + cNodeNameString +" ,parent: " + pNodeNameString);
-  
-  
+
+
 
   if (pNodeNameString == "/"){
-    console.log("[trust] child: " + cNodeNameString +" ,parent: " + pNodeNameString);
+    console.log("[Not signed] child: " + cNodeNameString +" ,parent: " + pNodeNameString);
     return;
   }
+
+  if (cNodeNameString.includes("uLsLn5csbB")){
+    console.log("[uLsLn5csbB] child: " + cNodeNameString);
+    return;
+  }
+
+
 
   var pNode = findNodeInTree(root, pNodeNameString);
   if (pNode == null) {
@@ -323,7 +330,7 @@ function findNodeInTree(node, dataNameString) {
     for (var i in node.children) {
       var child = node.children[i];
       var result = findNodeInTree(child, dataNameString);
-      if (result != null) 
+      if (result != null)
         return result;
     }
   }
