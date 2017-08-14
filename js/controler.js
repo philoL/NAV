@@ -11,20 +11,20 @@ function initial(){
     {
     "name" : "OpenmHealth",
     "ndnName" : "/org/OpenmHealth",
+    "dataType" : "org",
     "children": [
       {"name" : "User",
       "ndnName" : "/org/openmhealth/<user-id>",
+      "dataType" : "user",
       "children": [
-        {"name" : "Device",
-        "ndnName" : "/org/openmhealth/<user-id>/<device-id>",
+        {"name" : "Application",
+        "dataType" : "application",
+        "ndnName" : "/org/openmhealth/<user-id>/<app-id>",
         "children": [
-          {"name" : "Application",
-          "ndnName" : "/org/openmhealth/<user-id>/<device-id>/<app-id>",
-          "children": [
-            {"name" : "Data",
-            "ndnName" : "/org/openmhealth/<user-id>/<device-id>/<app-id>/Data",
-            "children": []}
-          ]}
+          {"name" : "Data",
+          "dataType" : "data",
+          "ndnName" : "/org/openmhealth/<user-id>/<app-id>/Data",
+          "children": []}
         ]}
       ]}
     ]}

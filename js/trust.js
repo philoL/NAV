@@ -3,8 +3,9 @@
  ************************************************/
 var trustModelData = [
   {
-    "name": "null",
-    "ndnName": "null",
+    "name": "",
+    "ndnName": "",
+    "dataType" : "",
     "children": new Array()
   }
 ];
@@ -13,7 +14,8 @@ var trustRelationshipData = [
   {
     "name": "",
     "ndnName": "/",
-    "parent": "null",
+    "dataType" : "",
+    "parent": null,
     "children": new Array()
   }
 ];
@@ -22,6 +24,7 @@ var trustRelationshipData = [
 
 var trustColorSet = ["#d1ebbb", "#d1eccc", "#d1eddd"];
 var trustNodeColor = "#AAAAAA";
+var dataNodeColor = "#AAAAAA";
 
 // ************** Generate the tree diagram  *****************
 var trustModelWidthTotal = 4000;
@@ -45,7 +48,9 @@ var trustRelationshipTree = d3.layout.tree().size([trustRelationshipHeight, trus
 var svgTrustModelTree,
     svgTrustRelationshipTree;
 
-var multiParents = [];
+//for selection 
+var selectedChild,
+    selectedParent;
 
 function createTrustSvgs() {
 
@@ -91,6 +96,8 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
   var nodes = myTree.nodes(myRoot).reverse(),
       links = myTree.links(nodes);
 
+  console.log("link " ,links);
+
   // Normalize for fixed-depth.
   nodes.forEach(function(d) { d.y = d.depth * 120; });
 
@@ -104,8 +111,8 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
     .attr("transform", function(d) {
       return "translate(" + source.y + "," + source.x + ")";
     })
-    .on("click", click)
-    .on("dblclick", doubleClick)
+    .on("click", trustClick)
+    .on("dblclick", trustDoubleClick)
     .on("mouseover", function(d){ d3.select(this).selectAll("#text-ndnname").style("display", "block"); })
     .on("mouseout", function(d){
       if (d.ndnName.length < 20 || d.depth < 2 || d.name != "") {
@@ -118,9 +125,31 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
   nodeEnter.append("circle")
     .attr("r", 1e-6)
     .style("fill", function(d) {
-      if (d.is_content) {
+      //assign type as well
+      //for trust model
+      if (d.name =="Data") {
+        d._dataType = "data";
         return dataNodeColor;
       }
+
+      //for trust relationship 
+      if (d.name == "" && d.ndnName.includes("FOR") && d.ndnName.includes("C-KEY") && !d.ndnName.includes("E-KEY")) {
+        d._dataType = "data";
+        return dataNodeColor;
+      }
+
+      if (d.name == "" && d.ndnName.includes("catalog")) {
+        d._dataType = "catalog";
+        return dataNodeColor;
+      }
+
+
+      if (d.name == "" && d.ndnName.includes("ndnfit")) {
+        d._dataType = "application";
+      }
+
+
+      //for both
       return colorSet[d.depth % colorSet.length];
     });
 
@@ -151,8 +180,11 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
       dy++;
       return tmpY.toString() + "em";
     })
-    // .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
-    .attr("text-anchor", "middle")
+    .attr("text-anchor", function(d) { 
+      if (d.name != "") return "middle";
+      else 
+        return d.children || d._children ? "middle" : "start"; })
+    // .attr("text-anchor", "middle")
     .text(function(d){return d.ndnName})
     .style("fill-opacity", 1e-6)
     .style("display", "block");
@@ -167,9 +199,9 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
   nodeUpdate.select("circle")
     .attr("r", 10)
     .style("stroke", function(d) {
-      if (d._children) {
-        return "#000";
-      }
+      // if (d._children) {
+      //   return "#fff";
+      // }
       return '#fff';
     });
 
@@ -249,7 +281,7 @@ function insertToTrustRelationshipTree(root, data) {
   var pNodeNameString = data.getSignature().getKeyLocator().getKeyName().toUri();
 
 
-  // console.log("[trust] child: " + cNodeNameString +" ,parent: " + pNodeNameString);
+  console.log("[trust] child: " + cNodeNameString +" ,parent: " + pNodeNameString);
 
 
 
@@ -260,9 +292,7 @@ function insertToTrustRelationshipTree(root, data) {
 
   if (cNodeNameString.includes("uLsLn5csbB")){
     console.log("[uLsLn5csbB] child: " + cNodeNameString);
-    return;
   }
-
 
 
   var pNode = findNodeInTree(root, pNodeNameString);
@@ -280,21 +310,56 @@ function insertToTrustRelationshipTree(root, data) {
 
 
   if (pNode.ndnName == "/") {
-    //if the parent node is the root, there is not parent name found, add a new branch
-    var newNode = {
-      "name" : "",
-      "ndnName" : pNodeNameString,
-      "children" : [
-        {
-          "name" : "",
-          "ndnName" : cNodeNameString,
-          "children" : new Array()
-        }
-      ]
+    //if the parent node is the root, check if the child is already there
+    var doesChildExist = false;
+    var foundChild;
+    var newNode;
+
+    //find child
+    for (var i in pNode.children){
+      var child = pNode.children[i];
+      if (child.ndnName == cNodeNameString) {
+        doesChildExist = true;
+        foundChild = child;
+        break;
+      }
     }
 
+    if (doesChildExist) {
+      //found
+      var tmpchild = foundChild;
+      var index = pNode.children.indexOf(foundChild);
+
+      if (index > -1) {
+        pNode.children.splice(index, 1);
+      }
+      
+      newNode = {
+        "name" : "",
+        "ndnName" : pNodeNameString,
+        "dataType" : "",
+        "children" : [foundChild]
+      }
+    } else {
+      //not found
+      newNode = {
+        "name" : "",
+        "ndnName" : pNodeNameString,
+        "dataType" : "",
+        "children" : [
+          {
+            "name" : "",
+            "ndnName" : cNodeNameString,
+            "dataType" : "",
+            "children" : new Array(),
+            "parent" : newNode
+          }
+        ]
+      }
+    }
 
     pNode["children"].push(newNode);
+
   } else {
     //the parent node exists in the tree
     var doesChildExist = false;
@@ -305,11 +370,13 @@ function insertToTrustRelationshipTree(root, data) {
         break;
       }
     }
+
     if (!doesChildExist) {
       //add a new child
       var newNode = {
         "name" : "",
         "ndnName" : cNodeNameString,
+        "dataType" : "",
         "children" : new Array()
       }
 
@@ -335,4 +402,89 @@ function findNodeInTree(node, dataNameString) {
     }
   }
   return null;
+}
+
+// Toggle children display on click.
+function trustClick(d) {
+
+  //not for the tree in trust model
+  if (d.name == "") {
+    
+    //this is a stupid way to
+    //update data not view
+    d3.select("svg#trustRelationship")
+      .selectAll("circle")
+      .style("stroke", function(d){ 
+        d._selected = false; 
+        return "#fff";
+      });
+
+    d._selected = true;
+
+    if (d.parent && d.parent.ndnName != "/") {
+      d.parent._selected = true;
+    } 
+
+    //update circle
+    d3.select("svg#trustRelationship")
+      .selectAll("circle")
+      .style("stroke", function(d){
+        if (d._selected) {
+          return "#000";
+        } else {
+          return "#fff";
+        }
+      })
+      .style("stroke-width", function(d){
+        if (d._selected) {
+          return 3;
+        }
+      });
+
+    //update path
+    d3.select("svg#trustRelationship")
+      .selectAll("path")
+      .style("stroke", function(d){
+        if (d.source.ndnName != "/" && d.source._selected && d.target._selected) {
+          return "#000";
+        } 
+      })
+      .style("stroke-width", function(d){
+        if (d.source._selected && d.target._selected) {
+          return 3;
+        }
+      });
+
+    //update trust model view
+    var childDataType = d._dataType;
+    var parentDataType = d.parent.ndnName == "/" ? d._dataType : d.parent._dataType;
+
+    console.log("child: ", childDataType, "parent: ", parentDataType);
+    if (d._dataType) {
+      d3.select("svg#trustModel")
+      .selectAll("path")
+      .style("stroke", function(d){
+        if (d.source.dataType == parentDataType &&  d.target.dataType == childDataType) {
+          return "#000";
+        } 
+      })
+      .style("stroke-width", function(d){
+        if (d.source.dataType == parentDataType &&  d.target.dataType == childDataType) {
+          return 3;
+        }
+      });
+    }
+  }
+}
+
+function trustDoubleClick(d) {
+  // var textElement = document.getElementById("text-name-" + d.id);
+  // if (textElement !== undefined) {
+  //   console.log(textElement.style.display);
+  //   if (textElement.style.display === "block") {
+  //     textElement.style.display = "none";
+  //   } else {
+  //     textElement.style.display = "block";
+  //   }
+  // }
 }

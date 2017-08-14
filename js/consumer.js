@@ -220,9 +220,9 @@ function onData(interest, data) {
     receivedContent[dataName.toUri()] = addedContentNode;
     // special hack for cert data so that we can later match without versioning
     // TODO: this hack means we don't support multiple versions of cert well...
-    if (dataName.size() > 1 && dataName.get(-2).toEscapedString() === "ID-CERT") {
-      receivedContent[dataName.getPrefix(-1).toUri()] = addedContentNode;
-    }
+    // if (dataName.size() > 1 && dataName.get(-2).toEscapedString() === "ID-CERT") {
+    //   receivedContent[dataName.getPrefix(-1).toUri()] = addedContentNode;
+    // }
 
     //insert to trust tree
     insertToTrustRelationshipTree(trustRelationshipRoot, data);
