@@ -454,7 +454,15 @@ function updateAccessControlTree(source) {
       return "translate(" + source.y + "," + source.x + ")"; 
     })
     .on("click", click)
-    .on("dblclick", doubleClick);
+    .on("dblclick", doubleClick)
+    .on("mouseover", function(d){ d3.select(this).selectAll("text").style("display", "block"); })
+    .on("mouseout", function(d){ 
+      if (d.textName.length < 20 || d.depth < 2) {
+        d3.select(this).selectAll("text").style("display", "block");
+      } else {
+        d3.select(this).selectAll("text").style("display", "none");
+      }
+    });;
 
   nodeEnter.append("circle")
     .attr("r", 1e-6)
@@ -471,11 +479,17 @@ function updateAccessControlTree(source) {
   nodeEnter.append("text")
     .attr("id", function(d) {  return "text-name-" + d.id.toString(); })
     .attr("x", function(d) { return d.children || d._children ? 0 : 0; })
-    .attr("dy", "-" + dy.toString() + "em")
-    .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
+    .attr("dy", function(d) { return d.children || d._children ? "-" + dy.toString() + "em" : dy.toString() + "em"; })
+    .attr("text-anchor", function(d) { return d.children || d._children ? "middle" : "start"; })
     .text(updateText)
     .style("fill-opacity", 1e-6)
-    .style("display", "block");
+    .style("display", function(d) {
+      if (d.textName.length < 20 || d.depth < 2) {
+        return "block";
+      } else {
+        return "none";
+      }
+    });
 
   // Transition nodes to their new position.
   var nodeUpdate = node.transition()
@@ -494,8 +508,15 @@ function updateAccessControlTree(source) {
     });
   
   nodeUpdate.select("text")
+    .text(updateText)
     .style("fill-opacity", 1)
-    .text(updateText);
+    .style("display", function(d) {
+      if (d.textName.length < 20 || d.depth < 2) {
+        return "block";
+      } else {
+        return "none";
+      }
+    });
 
   // Transition exiting nodes to the parent's new position.
   var nodeExit = node.exit().transition()

@@ -277,8 +277,7 @@ function insertToTrustRelationshipTree(root, data) {
       ]
     }
 
-    pNode.children.push(newNode);
-
+    pNode["children"].push(newNode);
   } else {
     //the parent node exists in the tree
     var doesChildExist = false;
@@ -297,7 +296,7 @@ function insertToTrustRelationshipTree(root, data) {
         "children" : new Array()
       }
 
-      pNode.children.push(newNode);
+      pNode["children"].push(newNode);
     }
   }
 

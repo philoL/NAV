@@ -80,7 +80,7 @@ function updateNameTree(source) {
     })
     .on("click", click)
     .on("dblclick", doubleClick)
-    .on("mouseover", function(d){ console.log("over !!! " ,d); d3.select(this).selectAll("text").style("display", "block"); })
+    .on("mouseover", function(d){ d3.select(this).selectAll("text").style("display", "block"); })
     .on("mouseout", function(d){ 
       if (d.textName.length < 20 || d.depth < 2) {
         d3.select(this).selectAll("text").style("display", "block");
