@@ -214,6 +214,10 @@ function onData(interest, data) {
     return;
   }
 
+  // if (dataName.toString().includes("ID-CERT")) {
+  //   console.log("%%%got data: " + dataName.toUri());
+  // }
+
   // we block multiple data with the same name from being displayed in the tree here
   if (receivedContent[dataName.toUri()] === undefined) {
     var addedContentNode = insertToTree(nameRoot, data);

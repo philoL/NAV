@@ -5,7 +5,7 @@ var accessControlOverviewHeightTotal = 150;
 var accessControlTimelineWidthTotal = 800;
 var accessControlTimelineHeightTotal = 160;
 var accessControlDetailsWidthTotal = 4000;
-var accessControlDetailsHeightTotal = 654;
+var accessControlDetailsHeightTotal = 754;
 
 var margin = {top: 20, right: 120, bottom: 20, left: 120},
     accessControlOverviewWidth = accessControlOverviewWidthTotal - margin.right - margin.left,
@@ -146,6 +146,8 @@ function createAccessControlSvgs() {
       // {label: "", times: [{"color":"white", "starting_time": 1355759910000, "ending_time": 1355761900000}]},
       // {label: "", times: [{"color":"white", "starting_time": 1355761910000, "ending_time": 1355763910000}]}
   ];
+  
+  acQuery = {};
 
   updateAccessControlSvgs();
 
@@ -467,9 +469,9 @@ function updateAccessControlTree(source) {
   nodeEnter.append("circle")
     .attr("r", 1e-6)
     .style("fill", function(d) {
-      if (d.is_content) {
+      if (d.children == undefined && !d._children) 
         return dataNodeColor;
-      }
+      
       return colorSet[d.depth % colorSet.length + 2];
     });
   
@@ -505,6 +507,12 @@ function updateAccessControlTree(source) {
         return "#000";
       }
       return '#fff';
+    })
+    .style("fill", function(d) {
+      if (d.children == undefined && !d._children) 
+        return dataNodeColor;
+      
+      return colorSet[d.depth % colorSet.length + 2];
     });
   
   nodeUpdate.select("text")

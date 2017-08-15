@@ -19,7 +19,7 @@ var dataNodeColor = "#AAAAAA";
 
 // ************** Generate the tree diagram  *****************
 var width_total = 4000;
-var height_total = 654;
+var height_total = 754;
 //document.body.clientHeight - document.getElementById("connect-section").offsetHeight- document.getElementById("option-section").offsetHeight;
 
 var margin = {top: 20, right: 120, bottom: 20, left: 120},
@@ -92,9 +92,9 @@ function updateNameTree(source) {
   nodeEnter.append("circle")
     .attr("r", 1e-6)
     .style("fill", function(d) {
-      if (d.is_content) {
+      if (d.children == undefined) 
         return dataNodeColor;
-      }
+      
       return colorSet[d.depth % colorSet.length];
     });
   
@@ -130,6 +130,12 @@ function updateNameTree(source) {
         return "#000";
       }
       return '#fff';
+    })
+    .style("fill", function(d) {
+      if (d.children == undefined && !d._children) 
+        return dataNodeColor;
+      
+      return colorSet[d.depth % colorSet.length];
     });
 
   nodeUpdate.select("text")
@@ -259,7 +265,7 @@ function click(d) {
     d.children = d._children;
     d._children = null;
   }
-  updateNameTree(d);
+  updateNameTree(nameRoot);
 }
 
 function doubleClick(d) {
@@ -514,7 +520,7 @@ function insertToTree(root, data, ignoreMaxBranchingDepth) {
   };
 
   // append to last treeNode
-  treeNode["children"].push(contentNode);
+  // treeNode["children"].push(contentNode);
 
   updateNameTree(nameTreeData[0]);
   return contentNode;
