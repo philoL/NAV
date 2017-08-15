@@ -24,6 +24,14 @@ function initial(){
           {"name" : "Data",
           "dataType" : "data",
           "ndnName" : "/org/openmhealth/<user-id>/<app-id>/Data",
+          "children": []},
+           {"name" : "Catalog",
+          "dataType" : "catalog",
+          "ndnName" : "/org/openmhealth/<user-id>/<app-id>/Data",
+          "children": []},
+           {"name" : "C-KEY",
+          "dataType" : "ckey",
+          "ndnName" : "/org/openmhealth/<user-id>/<app-id>/Data",
           "children": []}
         ]}
       ]}

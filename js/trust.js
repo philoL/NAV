@@ -23,12 +23,16 @@ var trustRelationshipData = [
 // var colorSet = ["#d1ebbb", "#7bafd0", "#deb276", "#92c3ad", "#f49158"];
 
 var trustColorSet = ["#d1ebbb", "#d1eccc", "#d1eddd"];
+var c20 = d3.scale.category20c();
+var linkColor = "#d1ebbb";
 var trustNodeColor = "#AAAAAA";
 var dataNodeColor = "#AAAAAA";
+var catalogNodeColor = "#66aa00";
+var ckeyNodeColor = "#990099";
 
 // ************** Generate the tree diagram  *****************
 var trustModelWidthTotal = 4000;
-var trustModelHeightTotal = 150;
+var trustModelHeightTotal = 200;
 var trustRelationshipWidthTotal = 4000;
 var trustRelationshipHeightTotal = 654;
 //document.body.clientHeight - document.getElementById("connect-section").offsetHeight- document.getElementById("option-section").offsetHeight;
@@ -113,9 +117,9 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
     })
     .on("click", trustClick)
     .on("dblclick", trustDoubleClick)
-    .on("mouseover", function(d){ d3.select(this).selectAll("#text-ndnname").style("display", "block"); })
+    .on("mouseover", function(d){if (d.name == "") {d3.select(this).selectAll("#text-ndnname").style("display", "block");} })
     .on("mouseout", function(d){
-      if (d.ndnName.length < 20 || d.depth < 2 || d.name != "") {
+      if ( (d.ndnName.length < 20 || d.depth < 2) && d.name == "") {
         d3.select(this).selectAll("#text-ndnname").style("display", "block");
       } else {
         d3.select(this).selectAll("#text-ndnname").style("display", "none");
@@ -125,29 +129,29 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
   nodeEnter.append("circle")
     .attr("r", 1e-6)
     .style("fill", function(d) {
-      //assign type as well
-      //for trust model
-      if (d.name =="Data") {
-        d._dataType = "data";
+
+      //[trust relationship] assign data type according to names
+      if (d.name == "" && d.ndnName.includes("FOR") && d.ndnName.includes("C-KEY") && !d.ndnName.includes("E-KEY")) 
+        d.dataType = "data";
+      
+      if (d.name == "" && d.ndnName.includes("catalog")) 
+        d.dataType = "catalog";
+
+      if (d.name == "" && d.ndnName.includes("ndnfit")) 
+        d.dataType = "application";
+      
+      if (d.name == "" && d.ndnName.includes("FOR") && d.ndnName.includes("C-KEY") && d.ndnName.includes("E-KEY")) 
+        d.dataType = "ckey";
+
+      //update color according to data type
+      if (d.dataType == "data") 
         return dataNodeColor;
-      }
+      
+      if (d.dataType == "catalog") 
+        return catalogNodeColor;
 
-      //for trust relationship 
-      if (d.name == "" && d.ndnName.includes("FOR") && d.ndnName.includes("C-KEY") && !d.ndnName.includes("E-KEY")) {
-        d._dataType = "data";
-        return dataNodeColor;
-      }
-
-      if (d.name == "" && d.ndnName.includes("catalog")) {
-        d._dataType = "catalog";
-        return dataNodeColor;
-      }
-
-
-      if (d.name == "" && d.ndnName.includes("ndnfit")) {
-        d._dataType = "application";
-      }
-
+      if (d.dataType == "ckey") 
+        return ckeyNodeColor;
 
       //for both
       return colorSet[d.depth % colorSet.length];
@@ -198,22 +202,30 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
 
   nodeUpdate.select("circle")
     .attr("r", 10)
-    .style("stroke", function(d) {
-      // if (d._children) {
-      //   return "#fff";
-      // }
-      return '#fff';
+    .style("stroke", function(d){
+        if (d._selected) {
+          return "#000";
+        } else {
+          return "#fff";
+        }
     });
 
+  //update text
   nodeUpdate.select("#text-name")
     .style("fill-opacity", 1)
     .text(function(d){return d.name});
+
 
   nodeUpdate.select("#text-ndnname")
     .text(function(d){return d.ndnName})
     .style("fill-opacity", 1)
     .style("display", function(d) {
-      if (d.ndnName.length < 20 || d.depth < 2 || d.name != "") {
+      //dont show ndnname in trust model
+      if (d.name != "") {
+        return "none"
+      }
+
+      if (d.ndnName.length < 20 || d.depth < 2) {
         return "block";
       } else {
         return "none";
@@ -456,15 +468,32 @@ function trustClick(d) {
       });
 
     //update trust model view
-    var childDataType = d._dataType;
-    var parentDataType = d.parent.ndnName == "/" ? d._dataType : d.parent._dataType;
+    
+    //reset
+    d3.select("svg#trustModel")
+      .selectAll("circle")
+      .style("stroke", function(d){
+        d._selected = false;
+        return "#fff";
+      });
+
+    d3.select("svg#trustModel")
+      .selectAll("path")
+      .style("stroke", function(d){return "";})
+      .style("stroke-width", 1);
+
+    //on selection
+    var childDataType = d.dataType;
+    var parentDataType = d.parent.ndnName == "/" ? d.dataType : d.parent.dataType;
 
     console.log("child: ", childDataType, "parent: ", parentDataType);
-    if (d._dataType) {
+    if (childDataType && parentDataType) {
       d3.select("svg#trustModel")
       .selectAll("path")
       .style("stroke", function(d){
         if (d.source.dataType == parentDataType &&  d.target.dataType == childDataType) {
+          d.source._selected = true;
+          d.target._selected = true;
           return "#000";
         } 
       })
@@ -473,6 +502,22 @@ function trustClick(d) {
           return 3;
         }
       });
+
+      d3.select("svg#trustModel")
+      .selectAll("circle")
+      .style("stroke", function(d){
+        if (d._selected) {
+          return "#000";
+        } else {
+          return "#fff";
+        }
+      })
+      .style("stroke-width", function(d){
+        if (d._selected) {
+          return 3;
+        }
+      });
+
     }
   }
 }
