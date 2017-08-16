@@ -45,8 +45,9 @@ function initial(){
   //construct access control policy data structure
   accessControlObj = {
     "meta" : {
-      "userList" : [{"name":"Haitao", "ndnName":"haitao"},
-                    {"name":"Teng", "ndnName":"teng"}],
+      "userList" : [{"name":"uLsLn5csbB", "ndnName":"uLsLn5csbB"}
+                    // ,{"name":"Teng", "ndnName":"teng"}
+                    ],
       "activityTypeList" : [{"name" : "Fitness", "ndnName":"fitness"}],
       "activityList" : [{"name":"Step", "ndnName":"step"}, 
                         {"name":"Heart Rate", "ndnName":"heartrate"}],
@@ -54,7 +55,7 @@ function initial(){
     },
     "accessList" : [
       {
-        "user" : "haitao",
+        "user" : "uLsLn5csbB",
         "accessDetails" : [
           {
             "username" : "Alice",
@@ -79,33 +80,34 @@ function initial(){
             ]
           }
         ]
-      },
-      {
-        "user" : "teng",
-        "accessDetails" : [
-          {
-            "username" : "Alice",
-            "ndnName" : "/org/openmhealth/user-123",
-            "access" : [
-               {"gradularity": "/fitness", "start": "1355752900000", "end" :"13557591000000"},
-            ]
-          },
-          {
-            "username" : "Bob",
-            "ndnName" : "/org/openmhealth/user-456",
-            "access" : [
-              {"gradularity": "/fitness/step", "start": "1355759910000", "end" :"1355761900000"}
-            ]
-          },
-          {
-            "username" : "Carol",
-            "ndnName" : "/org/openmhealth/user-789",
-            "access" : [
-              {"gradularity": "/fitness/heartrate", "start": "1355761910000", "end" :"1355763910000"}
-            ]
-          }
-        ]
       }
+      // ,
+      // {
+      //   "user" : "teng",
+      //   "accessDetails" : [
+      //     {
+      //       "username" : "Alice",
+      //       "ndnName" : "/org/openmhealth/user-123",
+      //       "access" : [
+      //          {"gradularity": "/fitness", "start": "1355752900000", "end" :"13557591000000"},
+      //       ]
+      //     },
+      //     {
+      //       "username" : "Bob",
+      //       "ndnName" : "/org/openmhealth/user-456",
+      //       "access" : [
+      //         {"gradularity": "/fitness/step", "start": "1355759910000", "end" :"1355761900000"}
+      //       ]
+      //     },
+      //     {
+      //       "username" : "Carol",
+      //       "ndnName" : "/org/openmhealth/user-789",
+      //       "access" : [
+      //         {"gradularity": "/fitness/heartrate", "start": "1355761910000", "end" :"1355763910000"}
+      //       ]
+      //     }
+      //   ]
+      // }
     ]
   }
 

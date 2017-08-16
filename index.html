@@ -78,20 +78,21 @@
         <td><input type="text" id="prefix" value="/org/openmhealth" style="width:115px;"></input></td>
       </tr>
     </table>
-    <button style="margin-left:112px;margin-right:0px;" id="connect" onclick="connectFace()">Connect Face</button>
+    <button style="margin-right:3px;margin-left:3px;width:90px;margin-bottom: 5px;margin-top: 5px;" id="connect" onclick="connectFace()">Connect Face</button>
+    <button style="margin-right:3px;margin-left:3px;width:90px;" id="pause">Pause</button> 
   </div>
 
   <div id="options-section" style="float:left;">
     <table>
-      <tr>
+      <!-- <tr>
         <td>Max tree depth:</td>
         <td><input type="text" id="max-depth" value="-1"></input></td>
       </tr>
-      <tr>
+      <tr> -->
         <td>Interest expression interval:</td>
         <td><input type="text" id="default-wait-time" value="100"></input></td>
       </tr>
-      <tr>
+      <!-- <tr>
         <td>Display name cutoff length:</td>
         <td><input type="text" id="cut-off-length" value="-1"></input></td>
       </tr>
@@ -110,15 +111,15 @@
       <tr>
         <td>Show trust relationship:</td>
         <td><input type="checkbox" id="show-trust-relationship" onclick="toggleTrustRelationship(this)"></input></td>
-      </tr>
+      </tr> -->
     </table>
   </div>
 
   <div id="dummy-data-controller" style="float:left;">
    <!--  <p><button style="width:115px;" id="dummy-tree" onclick="buildDummyTree()">Dummy Data</button></p>
     <p><button style="width:115px;" id="unit-test-tree" onclick="sausageUnitTest()">Test</button></p> -->
-    <p><button style="width:115px;" id="pause">Pause</button> </p>
-    <p><button style="width:115px;" onclick="fullScreen()" id="full-screen">View Full Screen</button></p>
+    <!-- <p><button style="width:115px;" id="pause">Pause</button> </p> -->
+    <!-- <p><button style="width:115px;" onclick="fullScreen()" id="full-screen">View Full Screen</button></p> -->
   </div>
   </div>
 

@@ -2,33 +2,33 @@
 function connectFace() {
   // document.getElementById('expandAll').onclick = function () { treeView.expandAll(); };
   // document.getElementById('collapseAll').onclick = function () { treeView.collapseAll(); };
-  freshOnly = document.getElementById('fresh-data').checked;
-  maxTreeDepth = document.getElementById('max-depth').value;
-  removeStaleFlag = document.getElementById('remove-stale-data').checked;
+  // freshOnly = document.getElementById('fresh-data').checked;
+  // maxTreeDepth = document.getElementById('max-depth').value;
+  // removeStaleFlag = document.getElementById('remove-stale-data').checked;
   defaultWaitTime = document.getElementById('default-wait-time').value;
-  cutOffLength = document.getElementById('cut-off-length').value;
-  maxBranchingFactor = document.getElementById('max-branching-factor').value;
-  showTrustRelationship = document.getElementById('show-trust-relationship').checked;
+  // cutOffLength = document.getElementById('cut-off-length').value;
+  // maxBranchingFactor = document.getElementById('max-branching-factor').value;
+  // showTrustRelationship = document.getElementById('show-trust-relationship').checked;
 
-  if (maxTreeDepth == "") {
+  if (!maxTreeDepth) {
     maxTreeDepth = -1;
   } else {
     maxTreeDepth = parseInt(maxTreeDepth);
   }
 
-  if (defaultWaitTime == "") {
+  if (!defaultWaitTime) {
     defaultWaitTime = 100;
   } else {
     defaultWaitTime = parseInt(defaultWaitTime);
   }
 
-  if (cutOffLength == "") {
+  if (!cutOffLength) {
     cutOffLength = -1;
   } else {
     cutOffLength = parseInt(cutOffLength);
   }
 
-  if (maxBranchingFactor == "") {
+  if (!maxBranchingFactor) {
     maxBranchingFactor = -1;
   } else {
     maxBranchingFactor = parseInt(maxBranchingFactor);
@@ -212,6 +212,10 @@ function onData(interest, data) {
 
   if (dataName.size() == 0) {
     return;
+  }
+
+  if (dataName.toString().includes("haitao")) {
+    receivedContent[dataName.toUri()] = "added";
   }
 
   // if (dataName.toString().includes("ID-CERT")) {

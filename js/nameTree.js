@@ -99,7 +99,7 @@ function updateNameTree(source) {
     });
   
   // append text on top of the nodes
-  var dy = getRandomInt(1, 3);
+  var dy = 0.5;
 
   nodeEnter.append("text")
     .attr("id", function(d) {  return "nodText";})
