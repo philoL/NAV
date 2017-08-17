@@ -70,6 +70,9 @@ var selectACRect;
 //data structure for access control tree
 var acTreeRoot;
 
+//nac tree
+var nacTreeData;
+
 //init svgs
 function createAccessControlSvgs() {
 
@@ -146,7 +149,7 @@ function createAccessControlSvgs() {
       // {label: "", times: [{"color":"white", "starting_time": 1355759910000, "ending_time": 1355761900000}]},
       // {label: "", times: [{"color":"white", "starting_time": 1355761910000, "ending_time": 1355763910000}]}
   ];
-  
+
   acQuery = {};
 
   updateAccessControlSvgs();
@@ -455,8 +458,8 @@ function updateAccessControlTree(source) {
     .attr("transform", function(d) { 
       return "translate(" + source.y + "," + source.x + ")"; 
     })
-    .on("click", click)
-    .on("dblclick", doubleClick)
+    .on("click", acTreeClick)
+    .on("dblclick", acTreeDoubleClick)
     .on("mouseover", function(d){ d3.select(this).selectAll("text").style("display", "block"); })
     .on("mouseout", function(d){ 
       if (d.textName.length < 20 || d.depth < 2) {
@@ -476,7 +479,7 @@ function updateAccessControlTree(source) {
     });
   
   // append text on top of the nodes
-  var dy = getRandomInt(1, 3);
+  var dy = 0.5;
 
   nodeEnter.append("text")
     .attr("id", function(d) {  return "text-name-" + d.id.toString(); })
@@ -571,4 +574,95 @@ function updateAccessControlTree(source) {
   //   d.x0 = d.x;
   //   d.y0 = d.y;
   // });
+}
+
+function findNodeInNacTree(r, node) {
+  if (r == node)
+    return r;
+  else {
+    for (i in r.children) {
+      var result = findNodeInNacTree(r.children[i], node);
+      if (result != null)
+        return result;
+    }
+  }
+  return null;
+}
+
+function insertToNacTree(r, p, c) {
+  var node = findNodeInNacTree(r, p);
+  if (node != null) {
+    node.children.push(c);
+  }
+}
+
+function acTreeClick(d){
+
+  d3.select("svg#accessControlDetails")
+    .selectAll("circle")
+    .style("stroke", function(d) {
+      d._selected = false;
+      if (d._selected) {
+        return "#000";
+      }
+      return '#fff';
+    });
+  
+  var indexOfFor = d.components.indexOf("FOR");
+  var indexOfCKey = d.components.indexOf("C-KEY");
+  var indexOfEKey = d.components.indexOf("E-KEY");
+  if (indexOfFor > -1 && indexOfCKey > -1 && indexOfEKey == -1){
+    d._selected = true;
+
+    var CKeyName = "/" + d.components.slice(indexOfFor+1, d.components.length).join("/");
+    console.log("ckey name : ", CKeyName);
+    var CKeyNode = findLeafInNameTree(nameRoot, CKeyName);
+    CKeyNode._selected = true;
+    console.log("ckey node : ", CKeyNode);
+
+
+    var EKeyName = "/" + CKeyNode.components.slice(indexOfFor+1, CKeyNode.components.length).join("/");
+    console.log("ekey name : ", EKeyName);
+    var EKeyNode = findLeafInNameTree(nameRoot, EKeyName);
+    EKeyNode._selected = true;
+    console.log("ekey node : ", EKeyNode);
+
+    var DKeyNodes = [];
+    var DKeyName = EKeyName.replace("E-KEY", "D-KEY");
+    console.log("dkey name : ", DKeyName);
+    findLeavesInNameTree(DKeyNodes, nameRoot, DKeyName);
+    for (var n in DKeyNodes) {
+      DKeyNodes[n]._selected = true;
+    }
+    console.log("dkey nodes : ", DKeyNodes);
+
+    // nacTreeData = d;
+    // insertToNacTree(nacTreeData, )
+
+    d3.select("svg#accessControlDetails")
+      .selectAll("circle")
+      .transition()
+      .duration(1000)
+      .style("stroke", function(d) {
+        // console.log(d);
+        if (d._selected) {
+          // console.log(d);
+          return "#000";
+        }
+        return '#fff';
+      })
+      .style("stroke-width", function(d) {
+        if (d._selected) {
+          return 6;
+        }
+        
+      });
+  }
+
+  
+
+}
+
+function acTreeDoubleClick(d){
+
 }

@@ -311,6 +311,57 @@ function findNodeInNameTree(node, dataNameString) {
   return null;
 }
 
+function GetFullName(node) {
+  //only when a node is the leaf (a data) returns the full name
+  if (node.children) {
+    return "";
+  } else {
+    var tmpNode = node.parent;
+    var fullName = node.textName;
+    while (typeof(tmpNode.textName) === "string") {
+      if (tmpNode.textName == "/")
+        fullName = tmpNode.textName+fullName;
+      else 
+        fullName = tmpNode.textName+"/"+fullName;
+      tmpNode = tmpNode.parent;
+
+      if (tmpNode == undefined)
+        break;
+    }
+    return fullName;
+  }
+}
+
+function findLeafInNameTree(node, dataNameString) {
+  // console.log("findLeafInNameTree node: ", node, " dataNameString: ", dataNameString);
+  var fullName = GetFullName(node);
+  // console.log(fullName);
+  if (fullName.startsWith(dataNameString)) {
+    return node;
+  } else {
+    for (var i in node.children) {
+      var child = node.children[i];
+      var result = findLeafInNameTree(child, dataNameString);
+      if (result != null) 
+        return result;
+    }
+  }
+  return null;
+}
+
+function findLeavesInNameTree(result, node, dataNameString) {
+  // console.log("findLeafInNameTree node: ", node, " dataNameString: ", dataNameString);
+  var fullName = GetFullName(node);
+  if (fullName.startsWith(dataNameString)) {
+    result.push(node);
+  } else {
+    for (var i in node.children) {
+      var child = node.children[i];
+      findLeavesInNameTree(result, child, dataNameString);
+    }
+  }
+}
+
 function removeFromTree(data) {
   var dataName = data.getName();
   var nameSize = dataName.size();
