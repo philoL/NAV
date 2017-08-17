@@ -26,13 +26,24 @@ var trustColorSet = ["#d1ebbb", "#d1eccc", "#d1eddd"];
 var c20 = d3.scale.category20c();
 var linkColor = "#d1ebbb";
 var trustNodeColor = "#AAAAAA";
+
+var colorDictionary = {
+  "data" : "#AAAAAA",
+  "ckey" : "#990099",
+  "catalog" : "#66aa00",
+  "ekey" : "#0099c6",
+  "dkey" : "#dd4477",
+  "user" : "#316395",
+  "org" : "#b82e2e",
+  "application" : "#22aa99"
+}
 var dataNodeColor = "#AAAAAA";
 var catalogNodeColor = "#66aa00";
 var ckeyNodeColor = "#990099";
 
 // ************** Generate the tree diagram  *****************
 var trustModelWidthTotal = 4000;
-var trustModelHeightTotal = 200;
+var trustModelHeightTotal = 254;
 var trustRelationshipWidthTotal = 4000;
 var trustRelationshipHeightTotal = 654;
 //document.body.clientHeight - document.getElementById("connect-section").offsetHeight- document.getElementById("option-section").offsetHeight;
@@ -52,7 +63,7 @@ var trustRelationshipTree = d3.layout.tree().size([trustRelationshipHeight, trus
 var svgTrustModelTree,
     svgTrustRelationshipTree;
 
-//for selection 
+//for selection
 var selectedChild,
     selectedParent;
 
@@ -131,27 +142,34 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
     .style("fill", function(d) {
 
       //[trust relationship] assign data type according to names
-      if (d.name == "" && d.ndnName.includes("FOR") && d.ndnName.includes("C-KEY") && !d.ndnName.includes("E-KEY")) 
+      if (d.name == "" && d.ndnName.includes("FOR") && d.ndnName.includes("C-KEY") && !d.ndnName.includes("E-KEY"))
         d.dataType = "data";
-      
-      if (d.name == "" && d.ndnName.includes("catalog")) 
+
+      if (d.name == "" && d.ndnName.includes("catalog"))
         d.dataType = "catalog";
 
-      if (d.name == "" && d.ndnName.includes("ndnfit")) 
+      if (d.name == "" && (d.ndnName.includes("ndnfit") || d.ndnName.includes("access_manager")))
         d.dataType = "application";
-      
-      if (d.name == "" && d.ndnName.includes("FOR") && d.ndnName.includes("C-KEY") && d.ndnName.includes("E-KEY")) 
+
+      if (d.name == "" && d.ndnName.includes("FOR") && d.ndnName.includes("C-KEY") && d.ndnName.includes("E-KEY"))
         d.dataType = "ckey";
 
-      //update color according to data type
-      if (d.dataType == "data") 
-        return dataNodeColor;
-      
-      if (d.dataType == "catalog") 
-        return catalogNodeColor;
+      if (d.name == "" && !d.ndnName.includes("C-KEY") && d.ndnName.includes("E-KEY"))
+        d.dataType = "ekey";
 
-      if (d.dataType == "ckey") 
-        return ckeyNodeColor;
+      if (d.name == "" && d.ndnName.includes("FOR") && d.ndnName.includes("ksk") && d.ndnName.includes("D-KEY"))
+        d.dataType = "dkey";
+
+      if (d.name == "" && d.ndnName.split("/").indexOf("KEY") == 3 && d.ndnName.split("/").indexOf("ID-CERT") == 6)
+        d.dataType = "user";
+
+      if (d.name == "" && d.ndnName.split("/").indexOf("KEY") == 3 && d.ndnName.split("/").indexOf("ID-CERT") == 5)
+        d.dataType = "org";
+
+      //update color according to data type
+      if (colorDictionary[d.dataType] != undefined) {
+        return colorDictionary[d.dataType];
+      }
 
       //for both
       return colorSet[d.depth % colorSet.length];
@@ -163,7 +181,7 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
   nodeEnter.append("text")
     .attr("id", function(d) {  return "text-name"; })
     .attr("x", function(d) { return d.children || d._children ? 0 : 0; })
-    .attr("dy", "-2em")
+    .attr("dy", "-1em")
     // .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
     .attr("text-anchor", "middle")
     .text(function(d){
@@ -182,11 +200,12 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
     .attr("dy", function(d) {
       var tmpY = (dy % 2 + 1)*1.5;
       dy++;
-      return tmpY.toString() + "em";
+      // return tmpY.toString() + "em";
+      return "1em";
     })
-    .attr("text-anchor", function(d) { 
+    .attr("text-anchor", function(d) {
       if (d.name != "") return "middle";
-      else 
+      else
         return d.children || d._children ? "middle" : "start"; })
     // .attr("text-anchor", "middle")
     .text(function(d){return d.ndnName})
@@ -292,20 +311,24 @@ function insertToTrustRelationshipTree(root, data) {
   var cNodeNameString = data.getName().toUri();
   var pNodeNameString = data.getSignature().getKeyLocator().getKeyName().toUri();
 
+  if (cNodeNameString.includes("ID-CERT")) {
+    var cNodeNameComponents = cNodeNameString.split("/");
+    cNodeNameComponents.splice(cNodeNameComponents.indexOf("ID-CERT")+1, cNodeNameComponents.length);
+    cNodeNameString = cNodeNameComponents.join("/");
+  }
+
+  if (pNodeNameString.includes("ID-CERT")) {
+    var pNodeNameComponents = pNodeNameString.split("/");
+    pNodeNameComponents.splice(pNodeNameComponents.indexOf("ID-CERT")+1, pNodeNameComponents.length)
+    pNodeNameString = pNodeNameComponents.join("/")
+  }
 
   console.log("[trust] child: " + cNodeNameString +" ,parent: " + pNodeNameString);
-
-
 
   if (pNodeNameString == "/"){
     console.log("[Not signed] child: " + cNodeNameString +" ,parent: " + pNodeNameString);
     return;
   }
-
-  if (cNodeNameString.includes("uLsLn5csbB")){
-    console.log("[uLsLn5csbB] child: " + cNodeNameString);
-  }
-
 
   var pNode = findNodeInTree(root, pNodeNameString);
   if (pNode == null) {
@@ -319,7 +342,6 @@ function insertToTrustRelationshipTree(root, data) {
   if (pNode["children"] == undefined) {
     pNode["children"] = [];
   }
-
 
   if (pNode.ndnName == "/") {
     //if the parent node is the root, check if the child is already there
@@ -345,7 +367,7 @@ function insertToTrustRelationshipTree(root, data) {
       if (index > -1) {
         pNode.children.splice(index, 1);
       }
-      
+
       newNode = {
         "name" : "",
         "ndnName" : pNodeNameString,
@@ -421,13 +443,13 @@ function trustClick(d) {
 
   //not for the tree in trust model
   if (d.name == "") {
-    
+
     //this is a stupid way to
     //update data not view
     d3.select("svg#trustRelationship")
       .selectAll("circle")
-      .style("stroke", function(d){ 
-        d._selected = false; 
+      .style("stroke", function(d){
+        d._selected = false;
         return "#fff";
       });
 
@@ -435,7 +457,18 @@ function trustClick(d) {
 
     if (d.parent && d.parent.ndnName != "/") {
       d.parent._selected = true;
-    } 
+    }
+
+    //if it is the trust root, select its root as well
+    if (d.dataType == "org") {
+      console.log(d);
+      for (var i in d.children) {
+        if (d.children[i].dataType == "org") {
+          d.children[i]._selected = true;
+          break;
+        }
+      }
+    }
 
     //update circle
     d3.select("svg#trustRelationship")
@@ -459,7 +492,7 @@ function trustClick(d) {
       .style("stroke", function(d){
         if (d.source.ndnName != "/" && d.source._selected && d.target._selected) {
           return "#000";
-        } 
+        }
       })
       .style("stroke-width", function(d){
         if (d.source._selected && d.target._selected) {
@@ -468,7 +501,7 @@ function trustClick(d) {
       });
 
     //update trust model view
-    
+
     //reset
     d3.select("svg#trustModel")
       .selectAll("circle")
@@ -486,7 +519,7 @@ function trustClick(d) {
     var childDataType = d.dataType;
     var parentDataType = d.parent.ndnName == "/" ? d.dataType : d.parent.dataType;
 
-    console.log("child: ", childDataType, "parent: ", parentDataType);
+    // console.log("child: ", childDataType, "parent: ", parentDataType);
     if (childDataType && parentDataType) {
       d3.select("svg#trustModel")
       .selectAll("path")
@@ -495,7 +528,7 @@ function trustClick(d) {
           d.source._selected = true;
           d.target._selected = true;
           return "#000";
-        } 
+        }
       })
       .style("stroke-width", function(d){
         if (d.source.dataType == parentDataType &&  d.target.dataType == childDataType) {
@@ -508,8 +541,12 @@ function trustClick(d) {
       .style("stroke", function(d){
         if (d._selected) {
           return "#000";
+        } else if (childDataType == "org" && d.dataType == "org") {
+          //if the selected is the root TODO:maybe a bug for future
+          d._selected = true;
+          return "#000";
         } else {
-          return "#fff";
+            return "#fff";
         }
       })
       .style("stroke-width", function(d){

@@ -1,3 +1,8 @@
+var nameBlacklist = [
+"haitao",
+"uLsLn5csbB"
+]
+
 // UI functions
 function connectFace() {
   // document.getElementById('expandAll').onclick = function () { treeView.expandAll(); };
@@ -62,7 +67,11 @@ function expressInterestWithExclusion(prefix, exclusion, leftmost, filterCertOrC
   // don't filter interests specific to Flow by default
   if (filterCertOrCommandOrPicInterest === true) {
     var prefixName = (new Name(prefix)).toUri();
-    if (prefixName.indexOf("ID-CERT") > 0) {
+    // if (prefixName.indexOf("ID-CERT") > 0) {
+    //   console.log("stop probing this branch because it contains a certificate name, or is a signed interest");
+    //   return;
+    // }
+    if (prefixName.indexOf("haitao") > 0) {
       console.log("stop probing this branch because it contains a certificate name, or is a signed interest");
       return;
     }
@@ -214,8 +223,10 @@ function onData(interest, data) {
     return;
   }
 
-  if (dataName.toString().includes("haitao")) {
-    receivedContent[dataName.toUri()] = "added";
+  for (var i in nameBlacklist) {
+    if (dataName.toString().includes(nameBlacklist[i])) {
+      receivedContent[dataName.toUri()] = "filtered out";
+    }
   }
 
   // if (dataName.toString().includes("ID-CERT")) {
