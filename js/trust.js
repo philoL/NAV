@@ -20,6 +20,13 @@ var trustRelationshipData = [
   }
 ];
 
+var signedDataBlackList = [
+{"childName":"/org/openmhealth/dpu/KEY/ksk-1501403935/ID-CERT",
+ "parentName":"/org/openmhealth/dpu/KEY/ksk-1501403935/ID-CERT"},
+ {"childName":"/org/openmhealth/dvu/KEY/ksk-1501399124/ID-CERT",
+ "parentName":"/org/openmhealth/dvu/KEY/ksk-1501399124/ID-CERT"}
+]
+
 // var colorSet = ["#d1ebbb", "#7bafd0", "#deb276", "#92c3ad", "#f49158"];
 
 var trustColorSet = ["#d1ebbb", "#d1eccc", "#d1eddd"];
@@ -34,8 +41,10 @@ var colorDictionary = {
   "ekey" : "#0099c6",
   "dkey" : "#dd4477",
   "user" : "#316395",
-  "org" : "#b82e2e",
-  "application" : "#22aa99"
+  "org" : "#000000",
+  "application" : "#22aa99",
+  "dpu": "#fd8d3c",
+  "dvu": "#e6550d"
 }
 var dataNodeColor = "#AAAAAA";
 var catalogNodeColor = "#66aa00";
@@ -166,6 +175,12 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
       if (d.name == "" && d.ndnName.split("/").indexOf("KEY") == 3 && d.ndnName.split("/").indexOf("ID-CERT") == 5)
         d.dataType = "org";
 
+      if (d.name == "" && d.ndnName.split("/").indexOf("dpu") == 4)
+        d.dataType = "dpu";
+
+      if (d.name == "" && d.ndnName.split("/").indexOf("dvu") == 4 )
+        d.dataType = "dvu";
+
       //update color according to data type
       if (colorDictionary[d.dataType] != undefined) {
         return colorDictionary[d.dataType];
@@ -201,7 +216,7 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
       var tmpY = (dy % 2 + 1)*1.5;
       dy++;
       // return tmpY.toString() + "em";
-      return "1em";
+      return "2em";
     })
     .attr("text-anchor", function(d) {
       if (d.name != "") return "middle";
@@ -223,7 +238,7 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
     .attr("r", 10)
     .style("stroke", function(d){
         if (d._selected) {
-          return "#000";
+          return "red";
         } else {
           return "#fff";
         }
@@ -308,8 +323,8 @@ function constructTrustModelTree(data) {
 
 function insertToTrustRelationshipTree(root, data) {
 
-  var cNodeNameString = data.getName().toUri();
-  var pNodeNameString = data.getSignature().getKeyLocator().getKeyName().toUri();
+  var cNodeNameString = data.getName().toString();
+  var pNodeNameString = data.getSignature().getKeyLocator().getKeyName().toString();
 
   if (cNodeNameString.includes("ID-CERT")) {
     var cNodeNameComponents = cNodeNameString.split("/");
@@ -323,6 +338,16 @@ function insertToTrustRelationshipTree(root, data) {
     pNodeNameString = pNodeNameComponents.join("/")
   }
 
+  //filter out invalid data
+  for (var i in signedDataBlackList) {
+    if (cNodeNameString.includes(signedDataBlackList[i]["childName"])&&
+        pNodeNameString.includes(signedDataBlackList[i]["parentName"]))
+    {
+      console.log("*********");
+      return;
+    }
+  }
+
   console.log("[trust] child: " + cNodeNameString +" ,parent: " + pNodeNameString);
 
   if (pNodeNameString == "/"){
@@ -330,91 +355,91 @@ function insertToTrustRelationshipTree(root, data) {
     return;
   }
 
+  var cNode = findNodeInTree(root, cNodeNameString);
   var pNode = findNodeInTree(root, pNodeNameString);
-  if (pNode == null) {
-    pNode = root;
-  }
-  console.log("[trust] found pNode: ", pNode);
-  if (pNode.ndnName != pNodeNameString) {
-    pNode = trustRelationshipRoot;
-  }
 
-  if (pNode["children"] == undefined) {
-    pNode["children"] = [];
-  }
+  console.log("[trust] found child: ", cNode, " ,parent: ", pNode);
 
-  if (pNode.ndnName == "/") {
-    //if the parent node is the root, check if the child is already there
-    var doesChildExist = false;
-    var foundChild;
-    var newNode;
+  if (cNode == null && pNode == null) {
+    var newNode = {
+          "name" : "",
+          "ndnName" : pNodeNameString,
+          "dataType" : "",
+          "children" : [
+            {
+              "name" : "",
+              "ndnName" : cNodeNameString,
+              "dataType" : "",
+              "children" : new Array(),
+            }
+          ]
+        };
 
-    //find child
-    for (var i in pNode.children){
-      var child = pNode.children[i];
-      if (child.ndnName == cNodeNameString) {
-        doesChildExist = true;
-        foundChild = child;
-        break;
-      }
-    }
+    if (root["children"] == undefined)
+      root["children"] = [];
 
-    if (doesChildExist) {
-      //found
-      var tmpchild = foundChild;
-      var index = pNode.children.indexOf(foundChild);
+    root.children.push(newNode);
 
-      if (index > -1) {
-        pNode.children.splice(index, 1);
-      }
+  } else if (cNode != null && pNode == null) {
+    //cNode must be the child of the root, add a parent to it
+    var tmpP = cNode.parent;
+    tmpP.children.splice(tmpP.children.indexOf(cNode), 1);
 
-      newNode = {
-        "name" : "",
-        "ndnName" : pNodeNameString,
-        "dataType" : "",
-        "children" : [foundChild]
-      }
-    } else {
-      //not found
-      newNode = {
-        "name" : "",
-        "ndnName" : pNodeNameString,
-        "dataType" : "",
-        "children" : [
-          {
-            "name" : "",
-            "ndnName" : cNodeNameString,
-            "dataType" : "",
-            "children" : new Array(),
-            "parent" : newNode
-          }
-        ]
-      }
-    }
+    var newNode = {
+          "name" : "",
+          "ndnName" : pNodeNameString,
+          "dataType" : "",
+          "children" : []
+        };
 
-    pNode["children"].push(newNode);
+    tmpP.children.push(newNode);
+    newNode.children.push(cNode);
+
+  } else if (cNode == null && pNode != null) {
+    if (pNode["children"] == undefined)
+      pNode["children"] = [];
+
+    var newNode = {
+          "name" : "",
+          "ndnName" : cNodeNameString,
+          "dataType" : "",
+          "children" : []
+        };
+
+    pNode.children.push(newNode);
 
   } else {
-    //the parent node exists in the tree
-    var doesChildExist = false;
-    for (var i in pNode.children){
-      var child = pNode.children[i];
-      if (child.ndnName == cNodeNameString) {
-        doesChildExist = true;
-        break;
-      }
-    }
+    //both exist
 
-    if (!doesChildExist) {
-      //add a new child
-      var newNode = {
-        "name" : "",
-        "ndnName" : cNodeNameString,
-        "dataType" : "",
-        "children" : new Array()
+    //if self signed, added for the 1st time
+    if (cNodeNameString == pNodeNameString) {
+      var doesChildExist = false;
+      for (var i in pNode.children) {
+        if (pNode.children[i].ndnName == cNodeNameString) {
+          doesChildExist = true;
+          break;
+        }
       }
+      if (!doesChildExist) {
+        var newNode = {
+          "name" : "",
+          "ndnName" : cNodeNameString,
+          "dataType" : "",
+          "children" : []
+        };
 
-      pNode["children"].push(newNode);
+        pNode.children.push(newNode);
+      }
+    } else {
+      //at different positions
+      if (pNode["children"] == undefined)
+        pNode["children"] = [];
+
+      var tmpP = cNode.parent;
+      tmpP.children.splice(tmpP.children.indexOf(cNode), 1);
+
+      // cNode.parent = pNode;
+      pNode.children.push(cNode);
     }
   }
 
@@ -422,7 +447,7 @@ function insertToTrustRelationshipTree(root, data) {
     updateTrustTree(trustRelationshipRoot, trustRelationshipTree, trustRelationshipRoot, svgTrustRelationshipTree);
 }
 
-//find the parent node in the tree with the dataNameString
+//find the node in the tree with the dataNameString
 function findNodeInTree(node, dataNameString) {
   // console.log("[trust] findNodeInTree node: ", node, " dataNameString: ", dataNameString);
   if (node.ndnName == dataNameString) {
@@ -475,7 +500,7 @@ function trustClick(d) {
       .selectAll("circle")
       .style("stroke", function(d){
         if (d._selected) {
-          return "#000";
+          return "red";
         } else {
           return "#fff";
         }
@@ -491,7 +516,7 @@ function trustClick(d) {
       .selectAll("path")
       .style("stroke", function(d){
         if (d.source.ndnName != "/" && d.source._selected && d.target._selected) {
-          return "#000";
+          return "red";
         }
       })
       .style("stroke-width", function(d){
@@ -527,7 +552,7 @@ function trustClick(d) {
         if (d.source.dataType == parentDataType &&  d.target.dataType == childDataType) {
           d.source._selected = true;
           d.target._selected = true;
-          return "#000";
+          return "red";
         }
       })
       .style("stroke-width", function(d){
@@ -540,11 +565,11 @@ function trustClick(d) {
       .selectAll("circle")
       .style("stroke", function(d){
         if (d._selected) {
-          return "#000";
+          return "red";
         } else if (childDataType == "org" && d.dataType == "org") {
           //if the selected is the root TODO:maybe a bug for future
           d._selected = true;
-          return "#000";
+          return "red";
         } else {
             return "#fff";
         }

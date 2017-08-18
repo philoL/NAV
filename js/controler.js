@@ -13,6 +13,18 @@ function initial(){
     "ndnName" : "/org/OpenmHealth",
     "dataType" : "org",
     "children": [
+      {
+        "name" : "DPU",
+        "ndnName" : "/org/OpenmHealth/dpu/<name>",
+        "dataType" : "dpu",
+        "children": []
+      },
+      {
+        "name" : "DVU",
+        "ndnName" : "/org/OpenmHealth/dvu/<name>",
+        "dataType" : "dvu",
+        "children": []
+      },
       {"name" : "User",
       "ndnName" : "/org/openmhealth/<user-id>",
       "dataType" : "user",
