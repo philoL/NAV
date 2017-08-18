@@ -124,41 +124,48 @@ function initial(){
 
 
 function showNameTree(){
-  d3.select("svg#trustModel").remove();
-  d3.select("svg#trustRelationship").remove();
-  d3.select("svg#accessControlOverview").remove();
-  d3.select("svg#accessControlTimeline").remove();
-  d3.select("svg#accessControlDetails").remove();
+  // d3.select("svg#trustModel").remove();
+  // d3.select("svg#trustRelationship").remove();
+  // d3.select("svg#accessControlOverview").remove();
+  // d3.select("svg#accessControlTimeline").remove();
+  // d3.select("svg#accessControlDetails").remove();
 
-  var elem = document.getElementById("nameTree");
-  if (elem == null) {
-    createNameTreeSvg();
-  }
 
+  // var elem = document.getElementById("nameTree");
+  // if (elem == null) {
+  //   createNameTreeSvg();
+  // }
+
+  d3.select("#view-container").selectAll("*").remove();
+  createNameTreeSvg();
 }
 
 function showTrustView(){
-  d3.select("svg#nameTree").remove();
-  d3.select("svg#accessControlOverview").remove();
-  d3.select("svg#accessControlTimeline").remove();
-  d3.select("svg#accessControlDetails").remove();
+  // d3.select("svg#nameTree").remove();
+  // d3.select("svg#accessControlOverview").remove();
+  // d3.select("svg#accessControlTimeline").remove();
+  // d3.select("svg#accessControlDetails").remove();
 
-  var elem = document.getElementById("trustModel");
-  if (elem == null) {
-    createTrustSvgs();
-  }
-
+  // var elem = document.getElementById("trustModel");
+  // if (elem == null) {
+  //   createTrustSvgs();
+  // }
+  d3.select("#view-container").selectAll("*").remove();
+  createTrustSvgs();
 }
 
 function showAccessControlView(){
 
-  d3.select("svg#trustModel").remove();
-  d3.select("svg#trustRelationship").remove();
-  d3.select("svg#nameTree").remove();
+  // d3.select("svg#trustModel").remove();
+  // d3.select("svg#trustRelationship").remove();
+  // d3.select("svg#nameTree").remove();
 
-  var elem = document.getElementById("accessControlOverview");
-  if (elem == null) {
-    createAccessControlSvgs();
-  }
+  // var elem = document.getElementById("accessControlOverview");
+  // if (elem == null) {
+  //   createAccessControlSvgs();
+  // }
+
+  d3.select("#view-container").selectAll("*").remove();
+  createAccessControlSvgs();
 }
 

@@ -6,6 +6,8 @@ var accessControlTimelineWidthTotal = 800;
 var accessControlTimelineHeightTotal = 160;
 var accessControlDetailsWidthTotal = 4000;
 var accessControlDetailsHeightTotal = 754;
+var nacWidthTotal = 4000;
+var nacHeightTotal = 754;
 
 var margin = {top: 20, right: 120, bottom: 20, left: 120},
     accessControlOverviewWidth = accessControlOverviewWidthTotal - margin.right - margin.left,
@@ -14,6 +16,8 @@ var margin = {top: 20, right: 120, bottom: 20, left: 120},
     accessControlTimelineHeight= accessControlTimelineHeightTotal - margin.top - margin.bottom;
     accessControlDetailsWidth = accessControlDetailsWidthTotal - margin.right - margin.left,
     accessControlDetailsHeight= accessControlDetailsHeightTotal - margin.top - margin.bottom;
+    nacWidth = nacWidthTotal - margin.right - margin.left,
+    nacHeight= nacHeightTotal - margin.top - margin.bottom;
 
 //color set
 var rectColorSet = ["#cccccc", "#109618"]
@@ -21,7 +25,8 @@ var rectColorSet = ["#cccccc", "#109618"]
 //svgs
 var svgAccessControlOverview,
 	  svgAccessControlTimeline,
-    svgAccessControlDetails;
+    svgAccessControlDetails,
+    svgNAC;
 
 //rect
 var rectWidth = 100;
@@ -71,7 +76,7 @@ var selectACRect;
 var acTreeRoot;
 
 //nac tree
-var nacTreeData;
+var nacTreeRoot;
 
 //init svgs
 function createAccessControlSvgs() {
@@ -467,7 +472,7 @@ function updateAccessControlTree(source) {
       } else {
         d3.select(this).selectAll("text").style("display", "none");
       }
-    });;
+    });
 
   nodeEnter.append("circle")
     .attr("r", 1e-6)
@@ -576,25 +581,6 @@ function updateAccessControlTree(source) {
   // });
 }
 
-function findNodeInNacTree(r, node) {
-  if (r == node)
-    return r;
-  else {
-    for (i in r.children) {
-      var result = findNodeInNacTree(r.children[i], node);
-      if (result != null)
-        return result;
-    }
-  }
-  return null;
-}
-
-function insertToNacTree(r, p, c) {
-  var node = findNodeInNacTree(r, p);
-  if (node != null) {
-    node.children.push(c);
-  }
-}
 
 function acTreeClick(d){
 
@@ -605,7 +591,7 @@ function acTreeClick(d){
       if (d._selected) {
         return "#000";
       }
-      return '#fff';
+      return "#fff";
     });
   
   var indexOfFor = d.components.indexOf("FOR");
@@ -619,7 +605,6 @@ function acTreeClick(d){
     var CKeyNode = findLeafInNameTree(nameRoot, CKeyName);
     CKeyNode._selected = true;
     console.log("ckey node : ", CKeyNode);
-
 
     var EKeyName = "/" + CKeyNode.components.slice(indexOfFor+1, CKeyNode.components.length).join("/");
     console.log("ekey name : ", EKeyName);
@@ -647,22 +632,269 @@ function acTreeClick(d){
         // console.log(d);
         if (d._selected) {
           // console.log(d);
-          return "#000";
+          return "red";
         }
-        return '#fff';
+        return "#fff";
       })
       .style("stroke-width", function(d) {
         if (d._selected) {
-          return 6;
+          return 3;
         }
-        
       });
   }
-
-  
-
 }
 
 function acTreeDoubleClick(d){
+  console.log("DDDDD");
 
+  d3.select("svg#accessControlDetails")
+    .selectAll("circle")
+    .transition()
+    .duration(1000)
+    .style("stroke", function(d) {
+      d._selected = false;
+      return "#fff";
+    })
+   .style("stroke-width", function(d) {
+        return 1;
+    });
+  
+  var indexOfFor = d.components.indexOf("FOR");
+  var indexOfCKey = d.components.indexOf("C-KEY");
+  var indexOfEKey = d.components.indexOf("E-KEY");
+  if (indexOfFor > -1 && indexOfCKey > -1 && indexOfEKey == -1){
+    
+    var CKeyName = "/" + d.components.slice(indexOfFor+1, d.components.length).join("/");
+    var CKeyNode = findLeafInNameTree(nameRoot, CKeyName);
+
+    nacTreeRoot = new nacTreeNode(GetFullName(d).replace(CKeyName, "/<C-KEY-Name>"), "Data");
+
+    indexOfFor = CKeyNode.components.indexOf("FOR");
+    var EKeyName = "/" + CKeyNode.components.slice(indexOfFor+1, CKeyNode.components.length).join("/");
+    var EKeyNode = findLeafInNameTree(nameRoot, EKeyName);
+
+    var nacTreeNodeCKey = new nacTreeNode(GetFullName(CKeyNode).replace(EKeyName, "/<E-KEY-Name>"), "C-KEY");
+    insertToNacTree(nacTreeRoot, nacTreeRoot, nacTreeNodeCKey);
+
+    var nacTreeNodeEKey = new nacTreeNode(GetFullName(EKeyNode), "E-KEY");
+    insertToNacTree(nacTreeRoot, nacTreeNodeCKey, nacTreeNodeEKey);
+
+    var DKeyNodes = [];
+    var DKeyName = EKeyName.replace("E-KEY", "D-KEY");
+    findLeavesInNameTree(DKeyNodes, nameRoot, DKeyName);
+    for (var n in DKeyNodes) {
+      var nacTreeNodeDKey = new nacTreeNode(GetFullName(DKeyNodes[n]), "D-KEY");
+      insertToNacTree(nacTreeRoot, nacTreeNodeEKey, nacTreeNodeDKey);
+
+      //public key
+      tmpArray = GetFullName(DKeyNodes[n]).split("/");
+      indexOfFor = tmpArray.indexOf("FOR");
+      var PKeyName = "/" + tmpArray.slice(indexOfFor+1, tmpArray.length).join("/");
+      var nacTreeNodePKey = new nacTreeNode(PKeyName, "Public KEY");
+      insertToNacTree(nacTreeRoot, nacTreeNodeDKey, nacTreeNodePKey);
+    }
+    
+    console.log("nacTreeRoot : ", nacTreeRoot);
+
+    //remove svg for details
+    d3.select("svg#accessControlDetails").remove();
+
+    //create svg for NAC tree
+    svgNAC = d3.select("#view-container").append("svg")
+      .attr("id", "NAC")
+      .attr("viewbox", "0, 0, " + nacWidthTotal + ", " + nacHeightTotal)
+      .attr("width", nacWidth + margin.right + margin.left)
+      .attr("height", nacHeight + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    d3.select("svg#NAC").append("text")
+      .attr("x", 10)
+      .attr("y", 20)
+      .text("NAC");
+
+    d3.select("svg#NAC").append("rect")
+      .attr("id", "back")
+      .attr("x", 50)
+      .attr("y", 0)
+      .attr("width", rectWidth/2)
+      .attr("height", rectHeight/1.2)
+      .attr("stroke","black")
+      .attr("stroke-width","1")
+      .attr("fill", "white")
+      .on("click", goBack);
+
+    d3.select("svg#NAC").append("text")
+      .attr("x", 60)
+      .attr("y", 20)
+      .text("back")
+      .on("click", goBack);
+
+    //update nactree
+    updateNACTree(nacTreeRoot);
+  }
+}
+
+var goBack = (function(){
+    return function(){
+      d3.select("svg#NAC").remove();
+      console.log("BBB");
+
+      //svg for access control details
+      svgAccessControlDetails = d3.select("#view-container").append("svg")
+        .attr("id", "accessControlDetails")
+        .attr("viewbox", "0, 0, " + accessControlDetailsWidthTotal + ", " + accessControlDetailsHeightTotal)
+        .attr("width", accessControlDetailsWidth + margin.right + margin.left)
+        .attr("height", accessControlDetailsHeight + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+      d3.select("svg#accessControlDetails").append("text")
+        .attr("x", 10)
+        .attr("y", 20)
+        .text("Details");
+
+      console.log("goBack: ", acTreeRoot);
+
+      updateAccessControlTree(acTreeRoot);
+    }
+})();
+
+class nacTreeNode {
+  constructor(name, type){
+    this.name = name;
+    this.children = [];
+    this.dataType = type;
+  }
+}
+
+function findNodeInNacTree(r, node) {
+  if (r == node)
+    return r;
+  else {
+    for (i in r.children) {
+      var result = findNodeInNacTree(r.children[i], node);
+      if (result != null)
+        return result;
+    }
+  }
+  return null;
+}
+
+function insertToNacTree(r, p, c) {
+  var node = findNodeInNacTree(r, p);
+  if (node != null) {
+    node.children.push(c);
+  }
+}
+
+function updateNACTree(source) {
+  // Compute the new tree layout.
+  var nodes = tree.nodes(source).reverse(),
+      links = tree.links(nodes);
+
+  // Normalize for fixed-depth.
+  nodes.forEach(function(d) { d.y = d.depth * 120; });
+
+  // Update the nodes
+  var node = svgNAC.selectAll("g.node")
+    .data(nodes, function(d) { return d.id || (d.id = ++i); });
+
+  // Enter any new nodes at the parent's previous position.
+  var nodeEnter = node.enter().append("g")
+    .attr("class", "node")
+    .attr("transform", function(d) { 
+      return "translate(" + source.y + "," + source.x + ")"; 
+    })
+    .on("mouseover", function(d){ d3.select(this).selectAll("text#ndnName").style("display", "block"); })
+    .on("mouseout", function(d){ 
+  
+      d3.select(this).selectAll("text#ndnName").style("display", "none");
+     
+    });;
+
+  nodeEnter.append("circle")
+    .attr("r", 1e-6)
+    .style("fill", function(d) {
+
+      return colorSet[d.depth % colorSet.length];
+    });
+  
+  // append data type on top of the nodes, and ndnName on bottom
+  var dy = 2;
+
+  nodeEnter.append("text")
+    .attr("id", function(d) {  return "dataType"; })
+    .attr("x", 0)
+    .attr("dy", function(d) { return "-" + dy.toString() + "em"; })
+    .attr("text-anchor", function(d) { return "middle"; })
+    .text( function(d) { return d.dataType })
+    .style("fill-opacity", 1e-6)
+    .style("display", function(d) {
+      return "block";
+    });
+
+  nodeEnter.append("text")
+    .attr("id", function(d) {  return "ndnName"; })
+    .attr("x", function(d) { return d.children || d._children ? 0 : 0; })
+    .attr("dy", function(d) { return dy.toString() + "em"; })
+    .attr("text-anchor", function(d) { return "start"; return d.children || d._children ? "middle" : "start"; })
+    .text( function(d) { return d.name })
+    .style("fill-opacity", 1e-6)
+    .style("display", function(d) {
+      return "none";
+    });
+
+  // Transition nodes to their new position.
+  var nodeUpdate = node.transition()
+    .duration(duration)
+    .attr("transform", function(d) { 
+      return "translate(" + d.y + "," + d.x + ")"; 
+    });
+
+  nodeUpdate.selectAll("circle")
+    .attr("r", 10);
+  
+  nodeUpdate.selectAll("text")
+    .style("fill-opacity", 1);
+
+  // Transition exiting nodes to the parent's new position.
+  var nodeExit = node.exit().transition()
+    .duration(duration)
+    .attr("transform", function(d) {
+      return "translate(" + source.y + "," + source.x + ")";
+    })
+    .remove();
+
+  nodeExit.select("circle")
+    .attr("r", 1e-6);
+
+  nodeExit.select("text")
+    .style("fill-opacity", 1e-6);
+
+  // Update the links
+  var link = svgNAC.selectAll("path.link")
+    .data(links, function(d) { return d.target.id; });
+
+  // Enter any new links at the parent's previous position.
+  link.enter().insert("path", "g")
+    .attr("class", "link")
+    .attr("d", function(d) {
+      var o = {x: source.x, y: source.y};
+      return diagonal({source: o, target: o});
+    });
+
+  // Transition links to their new position.
+  link.transition()
+    .duration(duration)
+    .attr("d", diagonal);
+
+  // Transition exiting nodes to the parent's new position.
+  link.exit().transition()
+    .duration(duration)
+    .attr("d", function(d) {
+      var o = {x: source.x, y: source.y};
+      return diagonal({source: o, target: o});
+    })
+    .remove();
 }
