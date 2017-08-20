@@ -541,6 +541,8 @@ function trustClick(d) {
         }
       })
       .attr("text-anchor", function(d) {
+        if (!d.parent)
+          return "start";
         if (d.parent._selected) {
           return "start";
         } else {
@@ -567,7 +569,7 @@ function trustClick(d) {
     var childDataType = d.dataType;
     var parentDataType = d.parent.ndnName == "/" ? d.dataType : d.parent.dataType;
 
-    // console.log("child: ", childDataType, "parent: ", parentDataType);
+    console.log("child: ", childDataType, "parent: ", parentDataType);
     if (childDataType && parentDataType) {
       d3.select("svg#trustModel")
       .selectAll("path")
