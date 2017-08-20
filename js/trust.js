@@ -92,7 +92,7 @@ function createTrustSvgs() {
     .attr("width", trustRelationshipWidth + margin.right + margin.left)
     .attr("height", trustRelationshipHeight + margin.top + margin.bottom)
     .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    .attr("transform", "translate(" + margin.left*1.2 + "," + margin.top + ")");
 
   d3.select("svg#trustModel").append("text")
     .attr("x", 10)
@@ -139,7 +139,7 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
     .on("dblclick", trustDoubleClick)
     .on("mouseover", function(d){if (d.name == "") {d3.select(this).selectAll("#text-ndnname").style("display", "block");} })
     .on("mouseout", function(d){
-      if ( (d.ndnName.length < 20 || d.depth < 2) && d.name == "") {
+      if ( (d.depth < 0 || d._selected) && d.name == "") {
         d3.select(this).selectAll("#text-ndnname").style("display", "block");
       } else {
         d3.select(this).selectAll("#text-ndnname").style("display", "none");
@@ -259,7 +259,7 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
         return "none"
       }
 
-      if (d.ndnName.length < 20 || d.depth < 2) {
+      if (d.depth < 0) {
         return "block";
       } else {
         return "none";
@@ -478,6 +478,11 @@ function trustClick(d) {
         return "#fff";
       });
 
+    if (d.ndnName == "/") {
+      //selected the root then do nothing 
+      return ;
+    }
+
     d._selected = true;
 
     if (d.parent && d.parent.ndnName != "/") {
@@ -522,6 +527,24 @@ function trustClick(d) {
       .style("stroke-width", function(d){
         if (d.source._selected && d.target._selected) {
           return 3;
+        }
+      });
+
+    //update text
+    d3.select("svg#trustRelationship")
+      .selectAll("text#text-ndnname")
+      .style("display", function(d) {
+        if (d._selected) {
+          return "block";
+        } else {
+          return "none";
+        }
+      })
+      .attr("text-anchor", function(d) {
+        if (d.parent._selected) {
+          return "start";
+        } else {
+          return "end";
         }
       });
 
