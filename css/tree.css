@@ -32,6 +32,10 @@
   stroke-width: 1.5px;
 }
 
+g#nameTreeDetails text{
+  font: 10px sans-serif;
+}
+
 
 /*.node {
   cursor: pointer;

@@ -36,7 +36,8 @@ var multiParents = [];
 var diagonal = d3.svg.diagonal()
   .projection(function(d) { return [d.y, d.x]; });
  
-var svgNameTree;
+var svgNameTree,
+    svgNameTreeDetails;
 
 function createNameTreeSvg() {
   svgNameTree = d3.select("#view-container").append("svg")
@@ -51,6 +52,20 @@ function createNameTreeSvg() {
     .attr("x", 10)
     .attr("y", 20)
     .text("Name Tree");
+
+  svgNameTreeDetails = d3.select("#view-container").append("svg")
+    .attr("id", "nameTreeDetails")
+    .attr("viewbox", "0, 0, " + 850 + ", " + 300)
+    .attr("width", 850 + margin.right + margin.left)
+    .attr("height", 300 + margin.top + margin.bottom)
+    .append("g")
+    .attr("id", "nameTreeDetails")
+    .attr("transform", "translate(" + margin.left*0.5 + "," + margin.top*2 + ")");
+
+  d3.select("svg#nameTreeDetails").append("text")
+    .attr("x", 10)
+    .attr("y", 20)
+    .text("Packet Details");
 
   d3.select(self.frameElement).style("height", "500px");
 
@@ -258,6 +273,23 @@ function updateText(d) {
 
 // Toggle children display on click.
 function click(d) {
+  console.log(d, fetchContentOfNode(d));
+
+  if (!d.children && !d._children) {
+    //leaf
+    d3.select("g#nameTreeDetails")
+      .selectAll("*")
+      .remove();
+
+    d3.select("g#nameTreeDetails")
+      .append("foreignObject")
+      .attr("width", 800)
+      .attr("height", 500)
+      .append("xhtml:body")
+      .style("font", "12px 'Helvetica Neue'")
+      .html("<strong>Name:</strong><br>"+GetFullName(d)+"<br><br><strong>Content:</strong><br>"+fetchContentOfNode(d));
+  }  
+
   if (d.children) {
     d._children = d.children;
     d.children = null;
@@ -470,6 +502,14 @@ function insertToTree(root, data, ignoreMaxBranchingDepth) {
     treeNode["children"] = [];
   }
 
+  //get content
+  var content = "";
+  try {
+    content = data.getContent().buf().toString('binary');
+  } catch (e) {
+    content = "[DATA]";
+  }
+
   // update names
   while (idx < nameSize && treeNode["children"].length > 0) {
     childMatch = false;
@@ -541,7 +581,8 @@ function insertToTree(root, data, ignoreMaxBranchingDepth) {
 
     var newChild = {
       "components": newChildComponents,
-      "children": []
+      "children": [],
+      "content" : content
     };
     
     if (maxBranchingFactor < 0) {
@@ -565,16 +606,34 @@ function insertToTree(root, data, ignoreMaxBranchingDepth) {
     content = "[DATA]";
   }
 
+  treeNode["content"] = content;
+
+
+  // // append to last treeNode
   var contentNode = {
     "components": [content],
     "is_content": true
   };
-
-  // append to last treeNode
   // treeNode["children"].push(contentNode);
 
   updateNameTree(nameTreeData[0]);
   return contentNode;
+}
+
+
+function fetchContentOfNode(node) {
+  if (node.content) {
+    return node.content;
+  } else {
+    tmp = node.parent;
+    while (tmp) {
+      if (tmp.content)
+        return tmp.content;
+      else 
+        tmp = tmp.parent;
+    }
+    return "";
+  }
 }
 
 /**************************
