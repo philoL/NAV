@@ -27,6 +27,19 @@ var signedDataBlackList = [
  "parentName":"/org/openmhealth/dvu/KEY/ksk-1501399124/ID-CERT"}
 ]
 
+var dataTypeToNameDictionary = {
+  "data" : "Data",
+  "ckey" : "C-KEY",
+  "catalog" : "Catalog",
+  "ekey" : "E-KEY",
+  "dkey" : "D-KEY",
+  "user" : "User's Key",
+  "org" : "Org's Key",
+  "application" : "Application's Key",
+  "dpu": "DPU's Key",
+  "dvu": "DVU's Key"
+}
+
 // var colorSet = ["#d1ebbb", "#7bafd0", "#deb276", "#92c3ad", "#f49158"];
 
 var trustColorSet = ["#d1ebbb", "#d1eccc", "#d1eddd"];
@@ -205,7 +218,7 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
       if (d.name != "") {
         return d.name;
       } else {
-        return d.ndnName;
+        return dataTypeToNameDictionary[d.dataType];
       }})
     .style("fill-opacity", 1e-6)
     .style("display", "block");
@@ -249,9 +262,7 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
 
   //update text
   nodeUpdate.select("#text-name")
-    .style("fill-opacity", 1)
-    .text(function(d){return d.name});
-
+    .style("fill-opacity", 1);
 
   nodeUpdate.select("#text-ndnname")
     .text(function(d){return d.ndnName})
