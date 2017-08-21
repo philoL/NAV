@@ -460,7 +460,8 @@ function insertToTrustRelationshipTree(root, data) {
         pNode["children"] = [];
 
       var tmpP = cNode.parent;
-      tmpP.children.splice(tmpP.children.indexOf(cNode), 1);
+      if (tmpP != undefined)
+        tmpP.children.splice(tmpP.children.indexOf(cNode), 1);
 
       // cNode.parent = pNode;
       pNode.children.push(cNode);

@@ -65,16 +65,21 @@ function connectFace() {
 // Internal mechanisms
 function expressInterestWithExclusion(prefix, exclusion, leftmost, filterCertOrCommandOrPicInterest) {
   // don't filter interests specific to Flow by default
-  if (filterCertOrCommandOrPicInterest === true) {
+  if (filterCertOrCommandOrPicInterest === true || 1) {
     var prefixName = (new Name(prefix)).toUri();
     // if (prefixName.indexOf("ID-CERT") > 0) {
     //   console.log("stop probing this branch because it contains a certificate name, or is a signed interest");
     //   return;
     // }
-    if (prefixName.indexOf("haitao") > 0) {
-      console.log("stop probing this branch because it contains a certificate name, or is a signed interest");
-      return;
+
+    //black list 
+    for (var i in nameBlacklist) {
+      if (prefixName.indexOf(nameBlacklist[i]) > 0) {
+        console.log("stop probing this branch because it is in blacklist: ", nameBlacklist[i]);
+        return;
+      }
     }
+    
     if (prefixName.toLowerCase().indexOf(".jpg") > 0 || (new Name(prefix)).toUri().toLowerCase().indexOf(".png") > 0) {
       console.log("stop probing this branch because it is probably sending an image");
       return;
