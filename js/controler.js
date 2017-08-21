@@ -9,49 +9,49 @@ function initial(){
   //#hardcode the trust model for open mhealth
    var trustModelObj = [
     {
-    "name" : "OpenmHealth",
-    "ndnName" : "/org/OpenmHealth",
+    "name" : "OpenmHealth's Key",
+    "ndnName" : "/org/OpenmHealth/KEY/<key-id>/ID-CERT",
     "dataType" : "org",
     "children": [
       {
-        "name" : "DPU",
-        "ndnName" : "/org/OpenmHealth/dpu/<name>",
+        "name" : "DPU's Key",
+        "ndnName" : "/org/OpenmHealth/dpu/<key-id>/ID-CERT",
         "dataType" : "dpu",
         "children": []
       },
       {
-        "name" : "DVU",
-        "ndnName" : "/org/OpenmHealth/dvu/<name>",
+        "name" : "DVU's Key",
+        "ndnName" : "/org/OpenmHealth/dvu/<key-id>/ID-CERT",
         "dataType" : "dvu",
         "children": []
       },
-      {"name" : "User",
-      "ndnName" : "/org/openmhealth/<user-id>",
+      {"name" : "User's Key",
+      "ndnName" : "/org/openmhealth/KEY/<user-id>/<key-id>/ID-CERT",
       "dataType" : "user",
       "children": [
-        {"name" : "Application",
+        {"name" : "Application's Key",
         "dataType" : "application",
-        "ndnName" : "/org/openmhealth/<user-id>/<app-id>",
+        "ndnName" : "/org/openmhealth/<user-id>/KEY/<app-id>/<key-id>/ID-CERT",
         "children": [
           {"name" : "Data",
           "dataType" : "data",
-          "ndnName" : "/org/openmhealth/<user-id>/<app-id>/Data",
+          "ndnName" : "/org/openmhealth/<user-id>/DATA/<app-id>/[data-name]",
           "children": []},
            {"name" : "Catalog",
           "dataType" : "catalog",
-          "ndnName" : "/org/openmhealth/<user-id>/<app-id>/Data",
+          "ndnName" : "/org/openmhealth/<user-id>/DATA/<app-id>/[catalog-name]",
           "children": []},
            {"name" : "C-KEY",
           "dataType" : "ckey",
-          "ndnName" : "/org/openmhealth/<user-id>/<app-id>/Data",
+          "ndnName" : "/org/openmhealth/<user-id>/DATA/<app-id>/[C-KEY-name]",
           "children": []},
           {"name" : "D-KEY",
           "dataType" : "dkey",
-          "ndnName" : "/org/openmhealth/<user-id>/<app-id>/Data",
+          "ndnName" : "/org/openmhealth/<user-id>/DATA/<app-id>/[D-KEY-name]",
           "children": []},
           {"name" : "E-KEY",
           "dataType" : "ekey",
-          "ndnName" : "/org/openmhealth/<user-id>/<app-id>/Data",
+          "ndnName" : "/org/openmhealth/<user-id>/DATA/<app-id>/[E-KEY-name]",
           "children": []}
         ]}
       ]}
@@ -66,7 +66,7 @@ function initial(){
   accessControlObj = {
     "meta" : {
       "userList" : [{"name":"49p49Bkph8", "ndnName":"49p49Bkph8"}
-                    // ,{"name":"Teng", "ndnName":"teng"}
+                    ,{"name":"mNwQJKXRwj", "ndnName":"mNwQJKXRwj"}
                     ],
       "activityTypeList" : [{"name" : "Fitness", "ndnName":"fitness"}],
       "activityList" : [{"name":"Step", "ndnName":"step"},
@@ -101,34 +101,27 @@ function initial(){
           //   ]
           // }
         ]
+      },
+      {
+        "user" : "mNwQJKXRwj",
+        "accessDetails" : [
+          {
+            "username" : "dpu",
+            "ndnName" : "/org/openmhealth/user-123",
+            "access" : [
+               {"gradularity": "/fitness/step", "start": "1355752800000", "end" :"1355759900000"},
+               {"gradularity": "/fitness/step", "start": "1355767900000", "end" :"1355774400000"}
+            ]
+          },
+          {
+            "username" : "dvu",
+            "ndnName" : "/org/openmhealth/user-456",
+            "access" : [
+              {"gradularity": "/fitness", "start": "1355752800000", "end" :"1355774400000"}
+            ]
+          }
+        ]
       }
-      // ,
-      // {
-      //   "user" : "teng",
-      //   "accessDetails" : [
-      //     {
-      //       "username" : "Alice",
-      //       "ndnName" : "/org/openmhealth/user-123",
-      //       "access" : [
-      //          {"gradularity": "/fitness", "start": "1355752900000", "end" :"13557591000000"},
-      //       ]
-      //     },
-      //     {
-      //       "username" : "Bob",
-      //       "ndnName" : "/org/openmhealth/user-456",
-      //       "access" : [
-      //         {"gradularity": "/fitness/step", "start": "1355759910000", "end" :"1355761900000"}
-      //       ]
-      //     },
-      //     {
-      //       "username" : "Carol",
-      //       "ndnName" : "/org/openmhealth/user-789",
-      //       "access" : [
-      //         {"gradularity": "/fitness/heartrate", "start": "1355761910000", "end" :"1355763910000"}
-      //       ]
-      //     }
-      //   ]
-      // }
     ]
   }
 

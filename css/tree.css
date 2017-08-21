@@ -22,6 +22,10 @@
   font: 10px sans-serif;
 }
 
+.selected {
+  font-weight: bold;;
+}
+
 .link {
   fill: none;
   stroke: #ccc;

@@ -33,7 +33,7 @@ var rectWidth = 100;
 var rectHeight = 30;
 
 //text in rect
-var textX = 25;
+var textX = 14;
 var textY = 28;
 
 //data structure for access control overview
