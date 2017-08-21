@@ -364,7 +364,14 @@ function filterAccessControlTimelineDataByQuery() {
   //update access control tree
   if (filterUser) {
     console.log("update ac tree: ", filterUser);
-    acTreeRoot = findNodeInNameTree(nameRoot, filterUser);
+
+    var orgNode = findNodeInNameTree(nameRoot, "org");
+    for (var i in orgNode.children) {
+      if (orgNode.children[i].components[0] == filterUser) {
+        acTreeRoot = orgNode.children[i];
+        break;
+      }
+    }
 
     console.log("\n found node: ", acTreeRoot);
     if (acTreeRoot === null) {

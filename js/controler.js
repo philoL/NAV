@@ -65,8 +65,9 @@ function initial(){
   //construct access control policy data structure
   accessControlObj = {
     "meta" : {
-      "userList" : [{"name":"49p49Bkph8", "ndnName":"49p49Bkph8"}
-                    ,{"name":"mNwQJKXRwj", "ndnName":"mNwQJKXRwj"}
+      "userList" : [{"name":"49p49Bkph8", "ndnName":"49p49Bkph8"},
+                    {"name":"mNwQJKXRwj", "ndnName":"mNwQJKXRwj"},
+                    {"name":"kby08cvYLC", "ndnName":"kby08cvYLC"}
                     ],
       "activityTypeList" : [{"name" : "Fitness", "ndnName":"fitness"}],
       "activityList" : [{"name":"Step", "ndnName":"step"},
@@ -104,6 +105,26 @@ function initial(){
       },
       {
         "user" : "mNwQJKXRwj",
+        "accessDetails" : [
+          {
+            "username" : "dpu",
+            "ndnName" : "/org/openmhealth/user-123",
+            "access" : [
+               {"gradularity": "/fitness/step", "start": "1355752800000", "end" :"1355759900000"},
+               {"gradularity": "/fitness/step", "start": "1355767900000", "end" :"1355774400000"}
+            ]
+          },
+          {
+            "username" : "dvu",
+            "ndnName" : "/org/openmhealth/user-456",
+            "access" : [
+              {"gradularity": "/fitness", "start": "1355752800000", "end" :"1355774400000"}
+            ]
+          }
+        ]
+      },
+      {
+        "user" : "kby08cvYLC",
         "accessDetails" : [
           {
             "username" : "dpu",
