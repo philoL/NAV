@@ -197,7 +197,6 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
 
   nodeEnter.append("text")
     .attr("id", function(d) {  return "text-name"; })
-    .attr("class", "unselected")
     .attr("x", function(d) { return d.children || d._children ? 0 : 0; })
     .attr("dy", "-1em")
     // .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
@@ -214,7 +213,6 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
   // append ndnname text on botom of the nodes
   nodeEnter.append("text")
     .attr("id", function(d) {  return "text-ndnname"; })
-    .attr("class", "unselected")
     // .attr("dx", "-3em")
     .attr("dy", function(d) {
       var tmpY = (dy % 2 + 1)*1.5;
@@ -246,7 +244,8 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
         } else {
           return "#fff";
         }
-    });
+    })
+    .style("stroke-width", 3);
 
   //update text
   nodeUpdate.select("#text-name")
@@ -264,7 +263,16 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
       } else {
         return "none";
       }
-    });
+    })
+    .style('fill', function(d) {
+        if (!d.parent)
+          return "#00008B";
+        if (d.parent._selected) {
+          return "#B22222";
+        } else {
+          return "#00008B";
+        }
+      });
 
   // Transition exiting nodes to the parent's new position.
   var nodeExit = node.exit().transition()
@@ -290,6 +298,11 @@ function updateTrustTree(source, myTree, myRoot, mySvg) {
     .attr("d", function(d) {
       var o = {x: source.x, y: source.y};
       return diagonal({source: o, target: o});
+    })
+    .style("stroke", function(d){
+      if (d.source._selected == true &&  d.target._selected == true) {
+        return selectedPathColor;
+      }
     });
 
   // Transition links to their new position.
